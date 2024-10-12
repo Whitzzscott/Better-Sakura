@@ -1,27 +1,34 @@
 const sidebar = document.createElement('div');
 
-const createButton = (text, activeColor = 'green') => {
+const createButton = (text, activeColor = '#4CAF50') => {
     const button = document.createElement('button');
     button.innerText = text;
     button.style.width = '100%';
-    button.style.height = '40px';
-    button.style.margin = '5px 0';
-    button.style.borderRadius = '10px';
+    button.style.height = '50px';
+    button.style.margin = '10px 0';
+    button.style.borderRadius = '8px';
     button.style.backgroundColor = '#555';
     button.style.color = 'white';
     button.style.border = 'none';
     button.style.cursor = 'pointer';
-    button.style.transition = 'background-color 0.3s, transform 0.2s';
-    button.style.fontSize = '14px';
-    button.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.3)';
+    button.style.transition = 'background-color 0.3s, transform 0.2s, box-shadow 0.3s';
+    button.style.fontSize = '16px';
+    button.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.5)';
+    button.style.fontFamily = 'Arial, sans-serif';
 
-    button.onmouseover = () => {
-        button.style.backgroundColor = '#777';
-        button.style.transform = 'scale(1.05)';
+    button.onmousedown = () => {
+        button.style.backgroundColor = activeColor;
+        button.style.boxShadow = '0 6px 15px rgba(0, 0, 0, 0.7)';
     };
+
+    button.onmouseup = () => {
+        button.style.backgroundColor = '#555';
+        button.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.5)';
+    };
+
     button.onmouseleave = () => {
-        button.style.backgroundColor = activeColor === 'green' ? activeColor : '#555';
-        button.style.transform = 'scale(1)';
+        button.style.backgroundColor = button.style.backgroundColor === activeColor ? activeColor : '#555';
+        button.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.5)';
     };
 
     return button;
@@ -62,7 +69,7 @@ window.addEventListener('scroll', () => {
 
 autoLoadButton.addEventListener('click', () => {
     autoLoadEnabled = !autoLoadEnabled;
-    autoLoadButton.style.backgroundColor = autoLoadEnabled ? 'green' : '#555';
+    autoLoadButton.style.backgroundColor = autoLoadEnabled ? '#4CAF50' : '#555';
     if (autoLoadEnabled) {
         autoLoadInterval = setInterval(autoLoadMore, 3000);
     } else {
@@ -111,7 +118,7 @@ const createOverlay = (title, contentElements) => {
     overlay.style.left = '0';
     overlay.style.width = '100%';
     overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(0,0,0,0.9)';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
     overlay.style.zIndex = '10000';
     overlay.style.display = 'flex';
     overlay.style.alignItems = 'center';
@@ -121,7 +128,7 @@ const createOverlay = (title, contentElements) => {
     const overlayUI = document.createElement('div');
     overlayUI.style.backgroundColor = '#444';
     overlayUI.style.padding = '20px';
-    overlayUI.style.borderRadius = '10px';
+    overlayUI.style.borderRadius = '12px';
     overlayUI.style.width = '400px';
     overlayUI.style.maxHeight = '80%';
     overlayUI.style.overflowY = 'auto';
@@ -134,6 +141,7 @@ const createOverlay = (title, contentElements) => {
     titleElement.style.marginBottom = '15px';
     titleElement.style.color = '#f0f0f0';
     titleElement.style.textAlign = 'center';
+    titleElement.style.fontFamily = 'Arial, sans-serif';
 
     const closeButton = createButton('Close');
     closeButton.onclick = () => {
@@ -152,6 +160,13 @@ const showPromptOverlay = () => {
     const promptList = document.createElement('ul');
     const loadMoreButton = createButton('Load More');
     const newPromptInput = document.createElement('input');
+    newPromptInput.style.width = '100%';
+    newPromptInput.style.padding = '10px';
+    newPromptInput.style.borderRadius = '5px';
+    newPromptInput.style.border = '1px solid #ccc';
+    newPromptInput.style.marginBottom = '10px';
+    newPromptInput.style.fontSize = '16px';
+
     const addPromptButton = createButton('Add Prompt');
 
     let currentPromptCount = 5;
@@ -165,11 +180,17 @@ const showPromptOverlay = () => {
             promptItem.style.cursor = 'pointer';
             promptItem.style.marginBottom = '10px';
             promptItem.style.color = '#f0f0f0';
-            promptItem.style.padding = '5px';
+            promptItem.style.padding = '10px';
             promptItem.style.borderRadius = '5px';
             promptItem.style.backgroundColor = '#555';
 
-            const downloadButton = createButton('Download', 'blue');
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.justifyContent = 'space-between';
+            buttonContainer.style.marginTop = '5px';
+
+            const downloadButton = createButton('Download', '#2196F3');
+            downloadButton.style.flex = '1';
             downloadButton.onclick = () => {
                 const blob = new Blob([prompt.text], { type: 'text/plain' });
                 const link = document.createElement('a');
@@ -178,14 +199,16 @@ const showPromptOverlay = () => {
                 link.click();
             };
 
-            const copyButton = createButton('Copy', 'blue');
+            const copyButton = createButton('Copy', '#2196F3');
+            copyButton.style.flex = '1';
             copyButton.onclick = () => {
                 navigator.clipboard.writeText(prompt.text).then(() => {
                     alert('Prompt copied to clipboard!');
                 });
             };
 
-            const removeButton = createButton('Remove', 'red');
+            const removeButton = createButton('Remove', '#F44336');
+            removeButton.style.flex = '1';
             removeButton.onclick = () => {
                 let storedPrompts = JSON.parse(localStorage.getItem('prompts')) || [];
                 storedPrompts = storedPrompts.filter(p => p.text !== prompt.text);
@@ -193,9 +216,10 @@ const showPromptOverlay = () => {
                 loadPrompts();
             };
 
-            promptItem.appendChild(downloadButton);
-            promptItem.appendChild(copyButton);
-            promptItem.appendChild(removeButton);
+            buttonContainer.appendChild(downloadButton);
+            buttonContainer.appendChild(copyButton);
+            buttonContainer.appendChild(removeButton);
+            promptItem.appendChild(buttonContainer);
             promptList.appendChild(promptItem);
         });
     };
@@ -241,6 +265,7 @@ const showSettingsOverlay = () => {
                 sidebar.style.backgroundImage = `url(${event.target.result})`;
                 sidebar.style.backgroundSize = 'cover';
                 sidebar.style.backgroundPosition = 'center';
+                sidebar.style.transition = 'background-image 0.3s ease-in-out';
             };
             reader.readAsDataURL(file);
         }
@@ -274,4 +299,4 @@ sidebar.appendChild(customJSButton);
 sidebar.appendChild(promptButton);
 sidebar.appendChild(settingsButton);
 sidebar.appendChild(dynamicButton);
-document.body.appendChild(sidebar);
+document.body.appendChild(sidebar);v
