@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/createcharacter.css">
+    <title>Create Character</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Create a Character</h1>
+        <input type="text" id="apiKey" placeholder="Enter your API Key" required>
+        <textarea id="characterDescription" placeholder="Character Description" rows="4" required></textarea>
+        <button id="createCharacterButton">Create Character</button>
+        <textarea id="geminiResponse" placeholder="Gemini Response" rows="10" readonly></textarea>
+        <div id="message" class="message"></div>
+    </div>
+    <script type="module" src="/createcharacter.js"></script>
+</body>
+</html>
