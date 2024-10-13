@@ -1,4 +1,4 @@
-{
+ {
   "manifest_version": 3,
   "name": "Better Sakura",
   "version": "2.0",
@@ -21,7 +21,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.sakura.fm.fm/*"],
+      "matches": ["https://www.sakura.fm/*"],
       "js": ["content.js"],
       "run_at": "document_end"
     }
@@ -29,7 +29,7 @@
   "web_accessible_resources": [
     {
       "resources": ["creating.html", "popup.html"],
-      "matches": ["https://www.sakura.fm.fm/*"]
+      "matches": ["<all_urls>"]
     }
   ],
   "icons": {
