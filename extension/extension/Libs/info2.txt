@@ -1,1 +1,0 @@
-Disclaimer: I do not own the rights to google-generative-ai.js. I am using it as a library to fix many problems of my project and to lift some restrictions in terms of api key in extensions..
