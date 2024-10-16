@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Better Sakura",
+  "name": "Better Sakura - Stable",
   "version": "3.0",
   "description": "A Chrome extension that makes Sakura much better",
   "permissions": [
