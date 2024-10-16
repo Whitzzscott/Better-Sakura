@@ -1,0 +1,28 @@
+{
+    "data": {
+        "author": "Whitzscott",
+        "timeCreated": "2024-10-16T12:00:00Z",
+        "lastUpdated": "2024-10-16T12:00:00Z",
+        "githubRepo": "https://github.com/Whitzscott",
+        "version": "1.0.0",
+        "license": "MIT",
+        "description": "A Chrome extension that makes Sakura much better",
+        "repositoryType": "GitHub",
+        "Type": "Buggy, Experimental build."
+    },
+    "disclaimer": "### Disclaimer: I do not own the rights to google-generative-ai.js nor with other libs.",
+    "libraries": [
+        "AOS",
+        "AOS CSS",
+        "Google AI JavaScript",
+        "Interact.js",
+        "Lottie.js",
+        "Tailwind CSS",
+        "Tailwind JS"
+    ],
+    "tags": [
+        "JavaScript",
+        "extension",
+        "apps,games."
+    ]
+}
