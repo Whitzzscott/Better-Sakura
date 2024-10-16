@@ -64,11 +64,11 @@ document.onmousemove = (e) => {
 const toggleExpand = (expand) => {
     Array.from(floatingUI.children).forEach(child => {
         if (child !== minimizeButton) {
-            child.style.opacity = expand ? '1' : '0'; // Control opacity for fade effect
-            child.style.transition = 'opacity 0.3s ease'; // Add transition effect for opacity
+            child.style.opacity = expand ? '1' : '0';
+            child.style.transition = 'opacity 0.3s ease';
             setTimeout(() => {
-                child.style.display = expand ? 'block' : 'none'; // Show/hide elements after transition
-            }, expand ? 0 : 300); // Delay hiding until the fade-out animation is complete
+                child.style.display = expand ? 'block' : 'none';
+            }, expand ? 0 : 300);
         }
     });
 };
