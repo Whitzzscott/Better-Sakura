@@ -1,46 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whitzs Tokenizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
+        @keyframes slideIn {
+            0% {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes dotBlink {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes typingDots {
+            0% {
+                content: '.';
+            }
+            33% {
+                content: '..';
+            }
+            66% {
+                content: '...';
+            }
+            100% {
+                content: '.';
+            }
+        }
+
+        .typing-indicator {
+            font-size: 1.5rem;
+            color: #4B5563;
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin: 0 4px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            animation: dotBlink 1.5s infinite alternate;
+        }
+
+        .dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .animated-container {
+            animation: slideIn 0.8s ease-out forwards;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #7F00FF, #E100FF);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
         }
 
         .container {
             width: 100%;
             max-width: 600px;
             background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             text-align: center;
-            font-size: 24px;
+            font-size: 2.5rem;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            animation: slideIn 0.8s ease-out forwards;
         }
 
         textarea {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
             font-size: 16px;
-            min-height: 100px;
+            min-height: 120px;
             resize: none;
+            transition: border 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #7C3AED;
+            box-shadow: 0 0 8px rgba(124, 58, 237, 0.5);
         }
 
         button {
@@ -49,72 +127,77 @@
             background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
+            animation: slideIn 0.8s ease-out forwards;
         }
 
         button:hover {
             background-color: #45a049;
         }
 
-        .typing-indicator {
-            font-size: 18px;
-            color: #888;
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .typing-indicator span {
-            display: inline-block;
-            animation: typing 1s infinite steps(5);
-        }
-
-        @keyframes typing {
-            0% { content: 'Typing'; }
-            25% { content: 'Typing.'; }
-            50% { content: 'Typing..'; }
-            75% { content: 'Typing...'; }
-            100% { content: 'Typing'; }
-        }
-
         .response {
-            margin-top: 20px;
+            margin-top: 30px;
             padding: 15px;
             background-color: #f1f1f1;
-            border-radius: 5px;
-            display: none;
+            border-radius: 8px;
             font-family: 'Courier New', Courier, monospace;
             font-size: 16px;
             white-space: pre-wrap;
+            display: none;
+            animation: fadeIn 0.8s ease-out forwards;
         }
 
         .error {
             color: red;
         }
 
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <h1>Welcome to the Whitzs Tokenizer/h1>
-        <p>Enter text to tokenize:</p>
+    <div class="container animated-container">
+        <h1>Whitzs Tokenizer</h1>
+        <p class="text-center mb-6">Enter text to tokenize and see the results instantly.</p>
 
-        <textarea id="textInput" placeholder="Enter your text here..."></textarea>
+        <textarea id="textInput" placeholder="Type or paste your text here..."></textarea>
         <button id="tokenizeBtn">Tokenize Text</button>
 
-        <div id="typingIndicator" class="typing-indicator">
-            <span>Typing</span>
+        <div id="typingIndicator" class="typing-indicator mt-4 hidden">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
         </div>
 
         <div id="responseContainer" class="response"></div>
     </div>
 
-    <script src="tokenizer.js">
+    <script>
+        const tokenizeBtn = document.getElementById('tokenizeBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const responseContainer = document.getElementById('responseContainer');
+
+        tokenizeBtn.addEventListener('click', () => {
+            typingIndicator.classList.remove('hidden');
+            setTimeout(() => {
+                typingIndicator.classList.add('hidden');
+                responseContainer.classList.remove('hidden');
+                responseContainer.textContent = 'Tokenized output goes here...';
+            }, 3000);
+        });
     </script>
-    
+
 </body>
+
 </html>
