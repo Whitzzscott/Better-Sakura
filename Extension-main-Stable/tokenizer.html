@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikToken API</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            min-height: 100px;
+            resize: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .typing-indicator {
+            font-size: 18px;
+            color: #888;
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            animation: typing 1s infinite steps(5);
+        }
+
+        @keyframes typing {
+            0% { content: 'Typing'; }
+            25% { content: 'Typing.'; }
+            50% { content: 'Typing..'; }
+            75% { content: 'Typing...'; }
+            100% { content: 'Typing'; }
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            display: none;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            white-space: pre-wrap;
+        }
+
+        .error {
+            color: red;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome to the TikToken API</h1>
+        <p>Enter text to tokenize:</p>
+
+        <textarea id="textInput" placeholder="Enter your text here..."></textarea>
+        <button id="tokenizeBtn">Tokenize Text</button>
+
+        <div id="typingIndicator" class="typing-indicator">
+            <span>Typing</span>
+        </div>
+
+        <div id="responseContainer" class="response"></div>
+    </div>
+
+    <script src="tokenizer.js">
+    </script>
+    
+</body>
+</html>
