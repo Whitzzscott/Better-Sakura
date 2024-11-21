@@ -11,14 +11,17 @@
             0% {
                 opacity: 0;
                 transform: scale(0.5);
+                background-color: #4CAF50;
             }
             50% {
                 opacity: 1;
                 transform: scale(1);
+                background-color: #68D391;
             }
             100% {
                 opacity: 0;
                 transform: scale(0.5);
+                background-color: #4CAF50;
             }
         }
 
@@ -52,10 +55,6 @@
 
         .dot:nth-child(3) {
             animation-delay: 0.6s;
-        }
-
-        .typing-container {
-            display: none;
         }
 
     </style>
@@ -100,7 +99,6 @@
             setTimeout(() => {
                 typingIndicator.classList.add('hidden');
                 responseContainer.classList.remove('hidden');
-                responseContainer.textContent = '..';
             }, 3000);
         });
     </script>
