@@ -216,7 +216,7 @@ const showPromptOverlay = () => {
             promptItem.textContent = prompt.text;
             promptItem.style.cursor = 'pointer';
             promptItem.style.marginBottom = '10px';
-            promptItem.style.color = '#f0f0f0';
+            promptItem.style.color = 'black';
             promptItem.style.padding = '10px';
             promptItem.style.borderRadius = '5px';
             promptItem.style.backgroundColor = '#555';
@@ -407,7 +407,7 @@ promptLibraryButton.onclick = async () => {
 
         if (!response.ok) {
             const errorData = await response.json();
-            responseArea.textContent = "Error: " + errorData.error;
+            console.log("Error: " + errorData.error);
         } else {
             const responseData = await response.json();
             const prompts = responseData.prompts;
@@ -418,6 +418,7 @@ promptLibraryButton.onclick = async () => {
             libraryOverlayContent.style.padding = '20px';
             libraryOverlayContent.style.borderRadius = '8px';
             libraryOverlayContent.style.boxShadow = '0 4px 15px rgba(0,0,0,0.5)';
+            libraryOverlayContent.style.animation = 'fadeIn 0.5s ease-in-out';
 
             const libraryTitle = document.createElement('h2');
             libraryTitle.textContent = 'Prompt Library';
@@ -467,7 +468,7 @@ promptLibraryButton.onclick = async () => {
             const createPromptButton = document.createElement('button');
             createPromptButton.textContent = 'Create New Prompt';
             createPromptButton.style.padding = '10px 15px';
-            createPromptButton.style.backgroundColor = 'black';
+            createPromptButton.style.backgroundColor = '#4CAF50';
             createPromptButton.style.color = 'white';
             createPromptButton.style.border = 'none';
             createPromptButton.style.borderRadius = '5px';
@@ -476,20 +477,12 @@ promptLibraryButton.onclick = async () => {
             createPromptButton.style.width = '100%';
             createPromptButton.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.5)';
             createPromptButton.onmouseover = () => {
-                createPromptButton.style.backgroundColor = '#444';
+                createPromptButton.style.backgroundColor = '#45a049';
                 createPromptButton.style.transform = 'scale(1.05)';
             };
             createPromptButton.onmouseout = () => {
-                createPromptButton.style.backgroundColor = 'black';
-                createPromptButton.style.transform = 'scale(1)';
-            };
-
-            createPromptButton.onmouseover = () => {
-                createPromptButton.style.backgroundColor = '#45a049';
-            };
-
-            createPromptButton.onmouseout = () => {
                 createPromptButton.style.backgroundColor = '#4CAF50';
+                createPromptButton.style.transform = 'scale(1)';
             };
 
             createPromptButton.onclick = async () => {
@@ -505,8 +498,8 @@ promptLibraryButton.onclick = async () => {
             createOverlay('Prompt Library', [libraryOverlayContent]);
         }
     } catch (error) {
+        console.log('Failed to load prompts. Please check the server response.');
         const errorItem = document.createElement('div');
-        errorItem.textContent = 'Failed to load prompts. Please check the server response.';
         errorItem.style.padding = '10px';
         errorItem.style.border = '1px solid #ccc';
         errorItem.style.borderRadius = '5px';
@@ -576,7 +569,7 @@ floatingUI.dataset.expanded = 'true';
 
 document.body.appendChild(floatingUI);
 
-const textareas = document.querySelectorAll('textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"]');
+const textareas = document.querySelectorAll('textarea[name^="exampleConversation"], textarea[name="description"], textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"], textarea[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-1 rounded-l-none"][id=":R5dicvf6lefja:-form-item"][aria-describedby=":R5dicvf6lefja:-form-item-description"]');
 
 textareas.forEach(textarea => {
     let lastPTag = null;
@@ -615,7 +608,17 @@ textareas.forEach(textarea => {
                 pTag.style.zIndex = '1';
                 textarea.parentNode.insertBefore(pTag, textarea.nextSibling);
                 overlayTags.push(pTag);
-                
+                const allTextareas = document.querySelectorAll('textarea');
+                allTextareas.forEach(textareaElement => {
+                    const examplePTag = document.createElement('p');
+                    examplePTag.textContent = `Token Count: ${tokenCount}, Word Count: ${wordCount}`;
+                    examplePTag.style.position = 'absolute';
+                    examplePTag.style.marginTop = '25px';
+                    examplePTag.style.color = '#f0f0f0';
+                    examplePTag.style.zIndex = '1';
+                    textareaElement.parentNode.insertBefore(examplePTag, textareaElement.nextSibling);
+                    overlayTags.push(examplePTag);
+                });
                 lastPTag = pTag;
             } catch (error) {
                 overlayTags.forEach(tag => tag.remove());
@@ -657,3 +660,38 @@ function adjustGuiForSmallScreens() {
 }
 
 adjustGuiForSmallScreens();
+
+// document.querySelectorAll('textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"]').forEach(textarea => {
+//     textarea.addEventListener('input', async (event) => {
+//         const text = event.target.value;
+//         const createCommandPattern = /\/\/create([\s\S]*?)\\/;
+//         const match = text.match(createCommandPattern);
+
+//         if (match) {
+//             const commandContent = match[1].trim();
+//             const aiResponse = await getAIResponse(commandContent);
+//             const responsePTag = document.createElement('p');
+//             responsePTag.textContent = aiResponse;
+//             responsePTag.style.color = '#f0f0f0';
+//             responsePTag.style.marginTop = '10px';
+//             textarea.parentNode.insertBefore(responsePTag, textarea.nextSibling);
+//         }
+//     });
+// });
+
+// async function getAIResponse(commandContent) {
+//     const API_URL = 'https://tiktoken-2nt2.onrender.com/ai';
+//     const AUTH_HEADER = 'Bearer SSS155';
+//     const response = await fetch(API_URL, {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             'Authorization': AUTH_HEADER
+//         },
+//         body: JSON.stringify({ text: `${commandContent} you are a neko girl` })
+//     });
+//     const data = await response.json();
+//     return data.response; // Assuming the response contains the AI's response in a field named 'response'
+// }
+
+
