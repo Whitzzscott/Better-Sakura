@@ -584,12 +584,24 @@ textareas.forEach(async textarea => {
         if (text) {
             const typingIndicator = document.createElement('p');
             typingIndicator.textContent = "Typing...";
-            typingIndicator.style.position = 'absolute';
-            typingIndicator.style.marginTop = '5px';
-            typingIndicator.style.color = '#f0f0f0';
-            typingIndicator.style.zIndex = '1';
+            Object.assign(typingIndicator.style, {
+                position: 'absolute',
+                marginTop: '5px',
+                color: '#32CD32', 
+                zIndex: '1',
+                fontSize: '0.95em', 
+                fontStyle: 'italic',
+                transition: 'opacity 0.5s ease-in-out, transform 0.5s ease-in-out',
+                opacity: '0',
+                transform: 'translateY(-5px)'
+            });
             textarea.parentNode.insertBefore(typingIndicator, textarea.nextSibling);
             overlayTags.push(typingIndicator);
+
+            requestAnimationFrame(() => {
+                typingIndicator.style.opacity = '1';
+                typingIndicator.style.transform = 'translateY(0)';
+            });
 
             try {
                 const tokenizedData = await tokenizeText(text);
@@ -601,13 +613,23 @@ textareas.forEach(async textarea => {
                 overlayTags = [];
 
                 const pTag = document.createElement('p');
-                pTag.textContent = `Total Token Count: ${tokenCount}, Word Count: ${wordCount}`;
+                pTag.textContent = `Tokens: ${tokenCount}, Words: ${wordCount}`;
                 pTag.style.position = 'absolute';
                 pTag.style.marginTop = '5px';
                 pTag.style.color = '#f0f0f0';
                 pTag.style.zIndex = '1';
+                pTag.style.fontSize = '0.8em';
+                pTag.style.fontStyle = 'italic';
+                pTag.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s ease-in-out';
+                pTag.style.transform = 'translateY(-10px)';
+                pTag.style.opacity = '0';
                 textarea.parentNode.insertBefore(pTag, textarea.nextSibling);
                 overlayTags.push(pTag);
+
+                setTimeout(() => {
+                    pTag.style.transform = 'translateY(0)';
+                    pTag.style.opacity = '1';
+                }, 0);
 
                 lastPTag = pTag;
             } catch (error) {
@@ -622,6 +644,11 @@ textareas.forEach(async textarea => {
 
     textarea.addEventListener('input', processText);
 });
+
+const instructionPTag = document.querySelector('p#\\:Rcicvf6lefja\\:-form-item-description.text-muted-foreground.text-\\[0\\.8rem\\]');
+if (instructionPTag) {
+    instructionPTag.remove();
+}
 
 async function tokenizeText(text) {
     const API_URL = 'https://tiktoken-2nt2.onrender.com/tokenize';
@@ -687,5 +714,3 @@ adjustGuiForSmallScreens();
 //     const data = await response.json();
 //     return data.response; // Assuming the response contains the AI's response in a field named 'response'
 // }
-
-
