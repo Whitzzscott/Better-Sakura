@@ -571,11 +571,11 @@ document.body.appendChild(floatingUI);
 
 const textareas = document.querySelectorAll('textarea[name^="exampleConversation"], textarea[name="description"], textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"], textarea[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-1 rounded-l-none"][id=":R5dicvf6lefja:-form-item"][aria-describedby=":R5dicvf6lefja:-form-item-description"]');
 
-textareas.forEach(textarea => {
+textareas.forEach(async textarea => {
     let lastPTag = null;
     let overlayTags = [];
     
-    textarea.addEventListener('input', async () => {
+    const processText = async () => {
         const text = textarea.value;
         
         overlayTags.forEach(tag => tag.remove());
@@ -616,7 +616,11 @@ textareas.forEach(textarea => {
                 console.error('Error processing text:', error);
             }
         }
-    });
+    };
+
+    await processText();
+
+    textarea.addEventListener('input', processText);
 });
 
 async function tokenizeText(text) {
