@@ -608,17 +608,7 @@ textareas.forEach(textarea => {
                 pTag.style.zIndex = '1';
                 textarea.parentNode.insertBefore(pTag, textarea.nextSibling);
                 overlayTags.push(pTag);
-                const allTextareas = document.querySelectorAll('textarea');
-                allTextareas.forEach(textareaElement => {
-                    const examplePTag = document.createElement('p');
-                    examplePTag.textContent = `Token Count: ${tokenCount}, Word Count: ${wordCount}`;
-                    examplePTag.style.position = 'absolute';
-                    examplePTag.style.marginTop = '25px';
-                    examplePTag.style.color = '#f0f0f0';
-                    examplePTag.style.zIndex = '1';
-                    textareaElement.parentNode.insertBefore(examplePTag, textareaElement.nextSibling);
-                    overlayTags.push(examplePTag);
-                });
+
                 lastPTag = pTag;
             } catch (error) {
                 overlayTags.forEach(tag => tag.remove());
@@ -693,5 +683,4 @@ adjustGuiForSmallScreens();
 //     const data = await response.json();
 //     return data.response; // Assuming the response contains the AI's response in a field named 'response'
 // }
-
 
