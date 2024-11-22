@@ -594,14 +594,14 @@ textareas.forEach(textarea => {
             try {
                 const tokenizedData = await tokenizeText(text);
                 const parsedData = JSON.parse(tokenizedData);
-                const tokenCount = parsedData["🧮 Token Count 🧮"];
+                const tokenCount = parsedData["🧮 Total Token Count 🧮"];
                 const wordCount = parsedData["💬 Word Count 💬"];
 
                 overlayTags.forEach(tag => tag.remove());
                 overlayTags = [];
 
                 const pTag = document.createElement('p');
-                pTag.textContent = `Token Count: ${tokenCount}, Word Count: ${wordCount}`;
+                pTag.textContent = `Total Token Count: ${tokenCount}, Word Count: ${wordCount}`;
                 pTag.style.position = 'absolute';
                 pTag.style.marginTop = '5px';
                 pTag.style.color = '#f0f0f0';
