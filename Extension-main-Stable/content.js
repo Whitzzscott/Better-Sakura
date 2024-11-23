@@ -955,14 +955,17 @@ textareas.forEach(async textarea => {
         typingIndicator.textContent = "Processing...";
         Object.assign(typingIndicator.style, {
             position: 'absolute',
-            marginTop: '5px', 
-            color: '#32CD32',
-            zIndex: '1',
-            fontSize: '0.95em',
-            fontStyle: 'italic', 
-            transition: 'opacity 0.5s ease-in-out, transform 0.5s ease-in-out',
+            marginTop: '8px',
+            color: '#FFFFFF',
+            zIndex: '1000',
+            fontSize: '14px',
+            fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
+            fontWeight: '500',
+            letterSpacing: '0.3px',
+            transition: 'opacity 0.3s ease, transform 0.3s ease',
             opacity: '0',
-            transform: 'translateY(-5px)'
+            transform: 'translateY(-5px)',
+            userSelect: 'none'
         });
         textarea.parentNode.insertBefore(typingIndicator, textarea.nextSibling);
         overlayTags.push(typingIndicator);
@@ -973,7 +976,7 @@ textareas.forEach(async textarea => {
         });
 
         try {
-            const tokenizedData = await tokenizeText(text || " "); 
+            const tokenizedData = await tokenizeText(text || " ");
             const parsedData = JSON.parse(tokenizedData);
             const tokenCount = parsedData["🧮 Total Token Count 🧮"] || 0;
             const wordCount = parsedData["💬 Word Count 💬"] || 0;
@@ -982,23 +985,29 @@ textareas.forEach(async textarea => {
             overlayTags = [];
 
             const pTag = document.createElement('p');
-            pTag.textContent = `Tokens: ${tokenCount}, Words: ${wordCount}`;
-            pTag.style.position = 'absolute';
-            pTag.style.marginTop = '5px';
-            pTag.style.color = '#f0f0f0';
-            pTag.style.zIndex = '1';
-            pTag.style.fontSize = '0.8em';
-            pTag.style.fontStyle = 'italic';
-            pTag.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s ease-in-out';
-            pTag.style.transform = 'translateY(-10px)';
-            pTag.style.opacity = '0';
+            pTag.textContent = `Tokens: ${tokenCount} | Words: ${wordCount}`;
+            Object.assign(pTag.style, {
+                position: 'absolute',
+                marginTop: textarea.matches('input[class*="rounded-l-none"]') ? '-20px' : '8px',
+                color: '#FFFFFF',
+                zIndex: '1000',
+                fontSize: textarea.matches('input[class*="rounded-l-none"]') ? '10px' : (window.innerWidth <= 768 ? '12px' : '14px'),
+                fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
+                fontWeight: '500',
+                letterSpacing: '0.3px',
+                transition: 'opacity 0.3s ease, transform 0.3s ease',
+                opacity: '0',
+                transform: 'translateY(-5px)',
+                userSelect: 'none',
+                whiteSpace: 'nowrap'
+            });
             textarea.parentNode.insertBefore(pTag, textarea.nextSibling);
             overlayTags.push(pTag);
 
-            setTimeout(() => {
-                pTag.style.transform = 'translateY(0)';
+            requestAnimationFrame(() => {
                 pTag.style.opacity = '1';
-            }, 0);
+                pTag.style.transform = 'translateY(0)';
+            });
 
             lastPTag = pTag;
         } catch (error) {
@@ -1015,7 +1024,7 @@ textareas.forEach(async textarea => {
                 if (window.location.pathname.includes('/tokenize') || localStorage.getItem('showPTag') === 'true') {
                     if (pTag) {
                         pTag.style.opacity = '1';
-                        pTag.style.transform = 'translateY(10px)';
+                        pTag.style.transform = 'translateY(0)';
                     }
                 }
             }
@@ -1027,19 +1036,32 @@ textareas.forEach(async textarea => {
         attributeFilter: ['value']
     });
 
-    // Remove property redefinition that was causing the error
+    textarea.addEventListener('input', processText);
     textarea.addEventListener('change', function() {
         const pTag = this.parentNode.querySelector('p');
         if (pTag && (window.location.pathname.includes('/tokenize') || localStorage.getItem('showPTag') === 'true')) {
             pTag.style.opacity = '1';
-            pTag.style.transform = 'translateY(10px)';
+            pTag.style.transform = 'translateY(0)';
             localStorage.setItem('showPTag', 'true');
         }
     });
 
-    await processText();
+    window.addEventListener('orientationchange', () => {
+        setTimeout(processText, 100);
+    });
 
-    textarea.addEventListener('input', processText);
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            const pTag = textarea.parentNode.querySelector('p');
+            if (pTag) {
+                pTag.style.fontSize = textarea.matches('input[class*="rounded-l-none"]') ? '10px' : (window.innerWidth <= 768 ? '12px' : '14px');
+            }
+        }, 250);
+    });
+
+    await processText();
 
     setInterval(() => {
         const pTag = textarea.parentNode.querySelector('p');
