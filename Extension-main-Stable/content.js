@@ -88,10 +88,15 @@ const stopDragging = () => {
     isScrolling = false;
     document.body.style.cursor = 'default';
     
-    const deceleration = 0.98;
-    const bounceFactor = 0.7;
+    const deceleration = 0.95;
+    const bounceFactor = -0.7;
     
     const animate = () => {
+        if (Math.abs(velocity.x) < 0.1 && Math.abs(velocity.y) < 0.1) {
+            floatingUI.style.transition = 'transform 0.2s ease';
+            return;
+        }
+        
         const currentLeft = parseFloat(floatingUI.style.left) || 0;
         const currentTop = parseFloat(floatingUI.style.top) || 0;
         const maxX = window.innerWidth - floatingUI.offsetWidth;
@@ -102,18 +107,18 @@ const stopDragging = () => {
         
         if (newLeft < 0) {
             newLeft = 0;
-            velocity.x = Math.abs(velocity.x) * bounceFactor;
+            velocity.x *= bounceFactor;
         } else if (newLeft > maxX) {
             newLeft = maxX;
-            velocity.x = -Math.abs(velocity.x) * bounceFactor;
+            velocity.x *= bounceFactor;
         }
         
         if (newTop < 0) {
             newTop = 0;
-            velocity.y = Math.abs(velocity.y) * bounceFactor;
+            velocity.y *= bounceFactor;
         } else if (newTop > maxY) {
             newTop = maxY;
-            velocity.y = -Math.abs(velocity.y) * bounceFactor;
+            velocity.y *= bounceFactor;
         }
         
         floatingUI.style.left = `${newLeft}px`;
@@ -121,11 +126,6 @@ const stopDragging = () => {
         
         velocity.x *= deceleration;
         velocity.y *= deceleration;
-        
-        if (Math.abs(velocity.x) < 0.01 && Math.abs(velocity.y) < 0.01) {
-            floatingUI.style.transition = 'transform 0.2s ease';
-            return;
-        }
         
         requestAnimationFrame(animate);
     };
