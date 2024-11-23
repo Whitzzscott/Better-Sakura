@@ -41,89 +41,143 @@ let autoLoadInterval;
 
 let isDragging = false;
 let offset = { x: 0, y: 0 };
+let lastPosition = { x: 0, y: 0 };
+let velocity = { x: 0, y: 0 };
+let lastTime = 0;
 
 const startDragging = (e) => {
     isDragging = true;
     const rect = floatingUI.getBoundingClientRect();
     offset.x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
     offset.y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    lastPosition.x = rect.left;
+    lastPosition.y = rect.top;
+    lastTime = Date.now();
     document.body.style.cursor = 'grabbing';
     floatingUI.style.transition = 'none';
+    floatingUI.style.transform = 'scale(1.02)';
 };
 
 const stopDragging = () => {
+    if (!isDragging) return;
     isDragging = false;
     document.body.style.cursor = 'default';
-    floatingUI.style.transition = 'left 0.3s ease, top 0.3s ease';
+    floatingUI.style.transform = 'scale(1)';
+    
+    const deceleration = 0.95;
+    const animate = () => {
+        if (Math.abs(velocity.x) < 0.1 && Math.abs(velocity.y) < 0.1) {
+            floatingUI.style.transition = 'transform 0.2s ease';
+            return;
+        }
+        
+        const currentLeft = parseFloat(floatingUI.style.left) || 0;
+        const currentTop = parseFloat(floatingUI.style.top) || 0;
+        const maxX = window.innerWidth - floatingUI.offsetWidth;
+        const maxY = window.innerHeight - floatingUI.offsetHeight;
+        
+        let newLeft = currentLeft + velocity.x;
+        let newTop = currentTop + velocity.y;
+        
+        if (newLeft < 0) {
+            newLeft = 0;
+            velocity.x = -velocity.x * 0.5;
+        } else if (newLeft > maxX) {
+            newLeft = maxX;
+            velocity.x = -velocity.x * 0.5;
+        }
+        
+        if (newTop < 0) {
+            newTop = 0;
+            velocity.y = -velocity.y * 0.5;
+        } else if (newTop > maxY) {
+            newTop = maxY;
+            velocity.y = -velocity.y * 0.5;
+        }
+        
+        floatingUI.style.left = `${newLeft}px`;
+        floatingUI.style.top = `${newTop}px`;
+        
+        velocity.x *= deceleration;
+        velocity.y *= deceleration;
+        
+        requestAnimationFrame(animate);
+    };
+    animate();
 };
 
 const drag = (e) => {
-    if (isDragging) {
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        floatingUI.style.left = `${clientX - offset.x}px`;
-        floatingUI.style.top = `${clientY - offset.y}px`;
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const newX = clientX - offset.x;
+    const newY = clientY - offset.y;
+    
+    const currentTime = Date.now();
+    const deltaTime = currentTime - lastTime;
+    if (deltaTime > 0) {
+        velocity.x = (newX - lastPosition.x) / deltaTime * 16;
+        velocity.y = (newY - lastPosition.y) / deltaTime * 16;
     }
+    
+    const maxX = window.innerWidth - floatingUI.offsetWidth;
+    const maxY = window.innerHeight - floatingUI.offsetHeight;
+    
+    let boundedX = newX;
+    let boundedY = newY;
+    
+    if (newX < 0) {
+        boundedX = newX * 0.3;
+    } else if (newX > maxX) {
+        boundedX = maxX + (newX - maxX) * 0.3;
+    }
+    
+    if (newY < 0) {
+        boundedY = newY * 0.3;
+    } else if (newY > maxY) {
+        boundedY = maxY + (newY - maxY) * 0.3;
+    }
+    
+    floatingUI.style.left = `${boundedX}px`;
+    floatingUI.style.top = `${boundedY}px`;
+    
+    lastPosition.x = boundedX;
+    lastPosition.y = boundedY;
+    lastTime = currentTime;
 };
 
 floatingUI.addEventListener('mousedown', startDragging);
-floatingUI.addEventListener('touchstart', startDragging);
+floatingUI.addEventListener('touchstart', startDragging, { passive: false });
 
 document.addEventListener('mouseup', stopDragging);
 document.addEventListener('touchend', stopDragging);
 
 document.addEventListener('mousemove', drag);
-document.addEventListener('touchmove', drag);
+document.addEventListener('touchmove', drag, { passive: false });
 
 function saveFloatingUIPosition() {
-    const floatingUI = document.querySelector('.floating-ui');
-    if (!floatingUI) return;
-
-    floatingUI.addEventListener('mousedown', (event) => {
-        isDragging = true;
-        const startX = event.clientX - floatingUI.offsetLeft;
-        const startY = event.clientY - floatingUI.offsetTop;
-
-        function onMouseMove(e) {
-            if (!isDragging) return;
-            floatingUI.style.left = `${e.clientX - startX}px`;
-            floatingUI.style.top = `${e.clientY - startY}px`;
-            floatingUI.style.transition = 'left 0.2s ease-out, top 0.2s ease-out';
-        }
-
-        function onMouseUp() {
-            isDragging = false;
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-
-            const position = {
-                top: floatingUI.style.top,
-                left: floatingUI.style.left
-            };
-            chrome.storage.sync.set({ floatingUIPosition: position });
-        }
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp, { once: true });
-    });
+    const position = {
+        top: floatingUI.style.top,
+        left: floatingUI.style.left
+    };
+    chrome.storage.sync.set({ floatingUIPosition: position });
 }
 
 function restoreFloatingUIPosition() {
-    const floatingUI = document.querySelector('.floating-ui');
-    if (!floatingUI) return;
-
-    const position = localStorage.getItem('floatingUIPosition');
-    if (position) {
-        const parsedPosition = JSON.parse(position);
-        floatingUI.style.top = parsedPosition.top;
-        floatingUI.style.left = parsedPosition.left;
-    }
+    chrome.storage.sync.get(['floatingUIPosition'], (result) => {
+        if (result.floatingUIPosition) {
+            floatingUI.style.top = result.floatingUIPosition.top;
+            floatingUI.style.left = result.floatingUIPosition.left;
+        }
+    });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    restoreFloatingUIPosition();
-    saveFloatingUIPosition();
-});
+document.addEventListener('mouseup', saveFloatingUIPosition);
+document.addEventListener('touchend', saveFloatingUIPosition);
+
+document.addEventListener('DOMContentLoaded', restoreFloatingUIPosition);
 
 const toggleExpand = (expand) => {
     Array.from(floatingUI.children).forEach(child => {
@@ -155,6 +209,12 @@ if (window.innerWidth <= 768) {
     minimizeButton.style.height = '40px';
     minimizeButton.style.fontSize = '20px';
     minimizeButton.style.padding = '4px';
+    minimizeButton.style.background = `linear-gradient(
+        to bottom,
+        #F44336 0%,
+        #F44336 ${minimizeButton.style.height}
+    )`;
+    minimizeButton.style.backgroundSize = '40px 40px';
 }
 minimizeButton.onclick = () => {
     const isExpanded = floatingUI.dataset.expanded === 'true';
