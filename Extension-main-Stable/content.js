@@ -199,95 +199,168 @@ floatingUI.appendChild(sendTokenizerButton);
 
 const createOverlay = (title, contentElements) => {
     const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.width = '100%';
-    overlay.style.height = '100%';
-    overlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
-    overlay.style.zIndex = '10000';
-    overlay.style.display = 'flex';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.color = 'white';
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity 0.5s ease-in-out';
+    Object.assign(overlay.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0,0,0,0)',
+        zIndex: '10000',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+        backdropFilter: 'blur(0px)'
+    });
 
     const overlayUI = document.createElement('div');
-    overlayUI.style.backgroundColor = '#333';
-    overlayUI.style.padding = '30px';
-    overlayUI.style.borderRadius = '15px';
-    overlayUI.style.width = '450px';
-    overlayUI.style.maxHeight = '80%';
-    overlayUI.style.overflowY = 'auto';
-    overlayUI.style.boxShadow = '0 8px 30px rgba(0,0,0,0.7)';
-    overlayUI.style.display = 'flex';
-    overlayUI.style.flexDirection = 'column';
-    overlayUI.style.transform = 'scale(0.9)';
-    overlayUI.style.transition = 'transform 0.3s ease-in-out';
+    Object.assign(overlayUI.style, {
+        backgroundColor: '#2c2c2c',
+        padding: '35px',
+        borderRadius: '20px',
+        width: '500px',
+        maxHeight: '85%',
+        overflowY: 'auto',
+        boxShadow: '0 12px 40px rgba(0,0,0,0.8)',
+        display: 'flex',
+        flexDirection: 'column',
+        transform: 'scale(0.95) translateY(20px)',
+        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+        border: '1px solid rgba(255,255,255,0.1)'
+    });
 
     const titleElement = document.createElement('h2');
+    Object.assign(titleElement.style, {
+        margin: '0 0 25px 0',
+        color: '#ffffff',
+        textAlign: 'center',
+        fontFamily: "'Segoe UI', Arial, sans-serif",
+        fontSize: '28px',
+        fontWeight: '600',
+        letterSpacing: '0.5px',
+        opacity: '0',
+        transform: 'translateY(-10px)',
+        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s'
+    });
     titleElement.innerText = title;
-    titleElement.style.marginBottom = '20px';
-    titleElement.style.color = '#e0e0e0';
-    titleElement.style.textAlign = 'center';
-    titleElement.style.fontFamily = 'Arial, sans-serif';
-    titleElement.style.fontSize = '24px';
 
     const closeButton = createButton('Close');
-    closeButton.style.marginTop = '20px';
-    closeButton.style.alignSelf = 'center';
-    closeButton.style.padding = '10px 20px';
-    closeButton.style.borderRadius = '8px';
-    closeButton.style.backgroundColor = '#f44336';
-    closeButton.style.color = 'white';
-    closeButton.style.border = 'none';
-    closeButton.style.cursor = 'pointer';
-    closeButton.style.transition = 'background-color 0.3s ease';
-    closeButton.onmouseover = () => closeButton.style.backgroundColor = '#d32f2f';
-    closeButton.onmouseout = () => closeButton.style.backgroundColor = '#f44336';
+    Object.assign(closeButton.style, {
+        marginTop: '25px',
+        alignSelf: 'center',
+        padding: '12px 24px',
+        borderRadius: '12px',
+        backgroundColor: '#f44336',
+        color: 'white',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '16px',
+        fontWeight: '500',
+        transition: 'all 0.3s ease',
+        transform: 'translateY(10px)',
+        opacity: '0'
+    });
+
+    closeButton.onmouseover = () => {
+        closeButton.style.backgroundColor = '#d32f2f';
+        closeButton.style.transform = 'translateY(-2px)';
+        closeButton.style.boxShadow = '0 5px 15px rgba(244, 67, 54, 0.4)';
+    };
+    
+    closeButton.onmouseout = () => {
+        closeButton.style.backgroundColor = '#f44336';
+        closeButton.style.transform = 'translateY(0)';
+        closeButton.style.boxShadow = 'none';
+    };
+
     closeButton.onclick = () => {
-        overlay.style.opacity = '0';
-        overlayUI.style.transform = 'scale(0.9)';
+        overlay.style.backgroundColor = 'rgba(0,0,0,0)';
+        overlay.style.backdropFilter = 'blur(0px)';
+        overlayUI.style.transform = 'scale(0.95) translateY(20px)';
+        overlayUI.style.opacity = '0';
+        titleElement.style.opacity = '0';
+        titleElement.style.transform = 'translateY(-10px)';
+        closeButton.style.opacity = '0';
+        closeButton.style.transform = 'translateY(10px)';
+        
         setTimeout(() => {
-            overlay.style.display = 'none';
-        }, 500);
+            overlay.remove();
+        }, 600);
     };
 
     overlayUI.appendChild(titleElement);
-    contentElements.forEach(el => overlayUI.appendChild(el));
+    contentElements.forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+        overlayUI.appendChild(el);
+    });
     overlayUI.appendChild(closeButton);
     overlay.appendChild(overlayUI);
     document.body.appendChild(overlay);
 
-    setTimeout(() => {
-        overlay.style.opacity = '1';
-        overlayUI.style.transform = 'scale(1)';
-    }, 0);
+    requestAnimationFrame(() => {
+        overlay.style.backgroundColor = 'rgba(0,0,0,0.85)';
+        overlay.style.backdropFilter = 'blur(5px)';
+        overlayUI.style.transform = 'scale(1) translateY(0)';
+        overlayUI.style.opacity = '1';
+        titleElement.style.opacity = '1';
+        titleElement.style.transform = 'translateY(0)';
+        closeButton.style.opacity = '1';
+        closeButton.style.transform = 'translateY(0)';
+        
+        contentElements.forEach((el, index) => {
+            setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, 200 + (index * 100));
+        });
+    });
 };
 
 const showPromptOverlay = () => {
     const overlayContent = document.createElement('div');
     const promptList = document.createElement('ul');
-    const loadMoreButton = createButton('Load More');
+    promptList.style.maxHeight = '400px';
+    promptList.style.overflowY = 'auto';
+    promptList.style.margin = '0';
+    promptList.style.padding = '0';
+    promptList.style.listStyle = 'none';
+
     const newPromptInput = document.createElement('input');
-    newPromptInput.style.width = '100%';
-    newPromptInput.style.padding = '10px';
-    newPromptInput.style.borderRadius = '5px';
-    newPromptInput.style.border = '1px solid #ccc';
-    newPromptInput.style.marginBottom = '10px';
-    newPromptInput.style.fontSize = '16px';
-    newPromptInput.style.color = 'white';
+    Object.assign(newPromptInput.style, {
+        width: '100%',
+        padding: '10px',
+        borderRadius: '5px', 
+        border: '1px solid #ccc',
+        marginBottom: '10px',
+        fontSize: '16px',
+        color: 'white',
+        backgroundColor: '#444'
+    });
+    newPromptInput.placeholder = 'Enter new prompt...';
 
     const addPromptButton = createButton('Add Prompt');
+    const loadMoreButton = createButton('Load More');
+    Object.assign(loadMoreButton.style, {
+        width: '100%',
+        marginTop: '10px',
+        backgroundColor: '#4CAF50',
+        display: 'none'
+    });
 
-    let currentPromptCount = 5;
+    let currentPromptCount = 10;
+    const PROMPTS_PER_PAGE = 10;
 
     const loadPrompts = () => {
         const storedPrompts = JSON.parse(localStorage.getItem('prompts')) || [];
         promptList.innerHTML = '';
         
-        storedPrompts.slice(0, currentPromptCount).forEach(prompt => {
+        const promptsToShow = storedPrompts.slice(0, currentPromptCount);
+        
+        promptsToShow.forEach(prompt => {
             const promptItem = document.createElement('li');
             Object.assign(promptItem.style, {
                 cursor: 'pointer',
@@ -295,84 +368,95 @@ const showPromptOverlay = () => {
                 color: 'white',
                 padding: '10px',
                 borderRadius: '5px',
-                backgroundColor: '#555'
+                backgroundColor: '#555',
+                wordBreak: 'break-word'
             });
             promptItem.textContent = prompt.text;
 
             const buttonContainer = document.createElement('div');
             Object.assign(buttonContainer.style, {
                 display: 'flex',
+                gap: '5px',
                 justifyContent: 'space-between',
                 marginTop: '5px'
             });
 
-            const createButtonWithAction = (text, color, action) => {
-                const button = createButton(text, color);
-                button.style.flex = '1';
-                button.onclick = action;
-                return button;
+            const downloadButton = createButton('Download');
+            downloadButton.onclick = (e) => {
+                e.stopPropagation();
+                const blob = new Blob([prompt.text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'prompt.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
             };
 
-            const downloadButton = createButtonWithAction('Download', '#2196F3', () => {
-                const blob = new Blob([prompt.text], { type: 'text/plain' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'prompt.txt';
-                link.click();
-            });
+            const copyButton = createButton('Copy');
+            copyButton.onclick = (e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(prompt.text)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                        }, 1000);
+                    });
+            };
 
-            const copyButton = createButtonWithAction('Copy', '#2196F3', () => {
-                navigator.clipboard.writeText(prompt.text).then(() => {
-                    alert('Prompt copied to clipboard!');
-                });
-            });
-
-            const removeButton = createButtonWithAction('Remove', '#F44336', () => {
+            const removeButton = createButton('Remove');
+            removeButton.style.backgroundColor = '#f44336';
+            removeButton.onclick = (e) => {
+                e.stopPropagation();
                 const updatedPrompts = storedPrompts.filter(p => p.text !== prompt.text);
                 localStorage.setItem('prompts', JSON.stringify(updatedPrompts));
                 loadPrompts();
+                updateLoadMoreButton(updatedPrompts.length);
+            };
+
+            [downloadButton, copyButton, removeButton].forEach(button => {
+                button.style.flex = '1';
+                buttonContainer.appendChild(button);
             });
 
-            [downloadButton, copyButton, removeButton].forEach(button => buttonContainer.appendChild(button));
             promptItem.appendChild(buttonContainer);
             promptList.appendChild(promptItem);
         });
+
+        updateLoadMoreButton(storedPrompts.length);
     };
 
-    loadPrompts();
-
-    loadMoreButton.style.display = 'none';
-
-    const checkLoadMoreVisibility = () => {
-        const promptItems = document.querySelectorAll('.prompt-item');
-        const totalHeight = Array.from(promptItems).reduce((sum, item) => sum + item.offsetHeight, 0);
-        const promptListHeight = promptList.offsetHeight;
-
-        if (totalHeight > promptListHeight) {
-            loadMoreButton.style.display = 'block';
-        } else {
-            loadMoreButton.style.display = 'none';
-        }
+    const updateLoadMoreButton = (totalPrompts) => {
+        loadMoreButton.style.display = totalPrompts > 10 ? 'block' : 'none';
     };
 
     loadMoreButton.onclick = () => {
-        currentPromptCount += 5;
+        currentPromptCount += PROMPTS_PER_PAGE;
         loadPrompts();
-        checkLoadMoreVisibility();
     };
 
-    checkLoadMoreVisibility();
-
     addPromptButton.onclick = () => {
-        const newPrompt = newPromptInput.value;
+        const newPrompt = newPromptInput.value.trim();
         if (newPrompt) {
             const storedPrompts = JSON.parse(localStorage.getItem('prompts')) || [];
-            storedPrompts.push({ text: newPrompt });
+            storedPrompts.unshift({ text: newPrompt });
             localStorage.setItem('prompts', JSON.stringify(storedPrompts));
             newPromptInput.value = '';
             loadPrompts();
         }
     };
+
+    newPromptInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            addPromptButton.click();
+        }
+    });
+
+    loadPrompts();
 
     overlayContent.appendChild(newPromptInput);
     overlayContent.appendChild(addPromptButton);
@@ -689,75 +773,180 @@ const tokenizeButton = createButton('Manual Trigger Token Counter');
 
 tokenizeButton.onclick = async () => {
     const textareas = document.querySelectorAll('input[name^="exampleConversation"], textarea[name="description"], textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"], input[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"], textarea[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-1 rounded-l-none"][id=":R5dicvf6lefja:-form-item"][aria-describedby=":R5dicvf6lefja:-form-item-description"]');
-    
-    const autoTrigger = localStorage.getItem('autoTrigger') === 'true';
+
     textareas.forEach(async textarea => {
-        const updateCounter = async () => {
+        let lastPTag = null;
+        let overlayTags = [];
+        
+        const processText = async () => {
             const text = textarea.value;
-            if (text || autoTrigger) {
-                try {
-                    const tokenizedData = await tokenizeText(text);
-                    const parsedData = JSON.parse(tokenizedData);
-                    const tokenCount = parsedData["🧮 Total Token Count 🧮"];
-                    const wordCount = parsedData["💬 Word Count 💬"];
+            
+            overlayTags.forEach(tag => tag.remove());
+            overlayTags = [];
 
-                    let pTag = textarea.parentNode.querySelector('p');
-                    if (!pTag) {
-                        pTag = document.createElement('p');
-                        pTag.textContent = `Tokens: ${tokenCount}, Words: ${wordCount}`;
-                        pTag.style.position = 'absolute';
-                        pTag.style.marginTop = '5px';
-                        pTag.style.color = '#f0f0f0';
-                        pTag.style.zIndex = '1';
-                        pTag.style.fontSize = '0.8em';
-                        pTag.style.fontStyle = 'italic';
-                        pTag.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s ease-in-out';
-                        pTag.style.transform = 'translateY(-10px)';
-                        pTag.style.opacity = '0';
-                        textarea.parentNode.insertBefore(pTag, textarea.nextSibling);
-                    } else {
-                        pTag.textContent = `Tokens: ${tokenCount}, Words: ${wordCount}`;
-                        pTag.style.opacity = '0';
-                        requestAnimationFrame(() => {
-                            pTag.style.transform = 'translateY(0)';
-                            pTag.style.opacity = '1';
-                        });
-                    }
+            const typingIndicator = document.createElement('p');
+            typingIndicator.textContent = "Processing...";
+            Object.assign(typingIndicator.style, {
+                position: 'absolute',
+                marginTop: '8px', 
+                color: '#FFFFFF',
+                zIndex: '1000',
+                fontSize: '14px',
+                fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
+                fontWeight: '500',
+                letterSpacing: '0.3px',
+                transition: 'opacity 0.3s ease, transform 0.3s ease',
+                opacity: '0',
+                transform: 'translateY(-5px)',
+                userSelect: 'none'
+            });
+            textarea.parentNode.insertBefore(typingIndicator, textarea.nextSibling);
+            overlayTags.push(typingIndicator);
 
-                    requestAnimationFrame(() => {
-                        pTag.style.transform = 'translateY(0)';
-                        pTag.style.opacity = '1';
-                    });
-                } catch (error) {
-                    console.error('Error processing text:', error);
-                }
+            requestAnimationFrame(() => {
+                typingIndicator.style.opacity = '1';
+                typingIndicator.style.transform = 'translateY(0)';
+            });
+
+            try {
+                const tokenizedData = await tokenizeText(text || " ");
+                const parsedData = JSON.parse(tokenizedData);
+                const tokenCount = parsedData["🧮 Total Token Count 🧮"] || 0;
+                const wordCount = parsedData["💬 Word Count 💬"] || 0;
+
+                overlayTags.forEach(tag => tag.remove());
+                overlayTags = [];
+
+                const pTag = document.createElement('p');
+                pTag.textContent = `Tokens: ${tokenCount} | Words: ${wordCount}`;
+                Object.assign(pTag.style, {
+                    position: 'absolute',
+                    marginTop: textarea.matches('input[class*="rounded-l-none"]') ? '-20px' : '8px',
+                    color: '#FFFFFF',
+                    zIndex: '1000',
+                    fontSize: textarea.matches('input[class*="rounded-l-none"]') ? '10px' : (window.innerWidth <= 768 ? '12px' : '14px'),
+                    fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
+                    fontWeight: '500',
+                    letterSpacing: '0.3px',
+                    transition: 'opacity 0.3s ease, transform 0.3s ease',
+                    opacity: '0',
+                    transform: 'translateY(-5px)',
+                    userSelect: 'none',
+                    whiteSpace: 'nowrap'
+                });
+                textarea.parentNode.insertBefore(pTag, textarea.nextSibling);
+                overlayTags.push(pTag);
+
+                requestAnimationFrame(() => {
+                    pTag.style.opacity = '1';
+                    pTag.style.transform = 'translateY(0)';
+                });
+
+                lastPTag = pTag;
+            } catch (error) {
+                overlayTags.forEach(tag => tag.remove());
+                overlayTags = [];
+                console.error('Error processing text:', error);
             }
         };
 
-        await updateCounter();
-
-        textarea.addEventListener('input', updateCounter);
+        await processText();
     });
-    if (autoTrigger) {
-        localStorage.setItem('autoTrigger', 'true');
-        console.log("Auto Trigger is on");
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                updateCounter();
-            }
-        });
-    });
-
-    observer.observe(textarea, {
-        childList: true,
-        attributes: true,
-        subtree: true
-    });
-    }
 };
 
 overlayContent.appendChild(tokenizeButton);
+
+const updateButton = createButton('Check for Updates');
+updateButton.onclick = async () => {
+    try {
+        if (!chrome.runtime?.id) {
+            alert('Extension context invalidated. Please refresh the page and try again.');
+            return;
+        }
+        const versionUrl = 'https://raw.githubusercontent.com/Whitzzscott/Better-Sakura/main/Extension-main-Stable/manifest.json';
+        const response = await fetch(versionUrl);
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch manifest');
+        }
+
+        const remoteManifest = await response.json();
+        const currentManifest = chrome.runtime.getManifest();
+
+        if (remoteManifest.version !== currentManifest.version) {
+            const updateOverlay = document.createElement('div');
+            updateOverlay.style.position = 'fixed';
+            updateOverlay.style.top = '50%';
+            updateOverlay.style.left = '50%';
+            updateOverlay.style.transform = 'translate(-50%, -50%)';
+            updateOverlay.style.backgroundColor = '#222';
+            updateOverlay.style.color = '#fff';
+            updateOverlay.style.padding = '20px';
+            updateOverlay.style.borderRadius = '8px';
+            updateOverlay.style.boxShadow = '0 4px 15px rgba(0,0,0,0.5)';
+            updateOverlay.style.zIndex = '10000';
+
+            updateOverlay.innerHTML = `
+                <h3>Update Available!</h3>
+                <p>Current version: ${currentManifest.version}</p>
+                <p>New version: ${remoteManifest.version}</p>
+                <p>How would you like to update?</p>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button id="autoUpdate" style="padding: 8px 15px; border-radius: 4px; background: #4CAF50; color: white; border: none; cursor: pointer;">Auto Update</button>
+                    <button id="manualUpdate" style="padding: 8px 15px; border-radius: 4px; background: #2196F3; color: white; border: none; cursor: pointer;">Manual Update</button>
+                    <button id="cancelUpdate" style="padding: 8px 15px; border-radius: 4px; background: #f44336; color: white; border: none; cursor: pointer;">Cancel</button>
+                </div>
+            `;
+
+            document.body.appendChild(updateOverlay);
+
+            document.getElementById('autoUpdate').onclick = async () => {
+                try {
+                    const zipUrl = 'https://github.com/Whitzzscott/Better-Sakura/archive/refs/heads/main.zip';
+                    const zipResponse = await fetch(zipUrl, {
+                        mode: 'cors',
+                        headers: {
+                            'Accept': 'application/zip'
+                        }
+                    });
+
+                    if (!zipResponse.ok) {
+                        throw new Error('Network error: Failed to fetch');
+                    }
+
+                    const blob = await zipResponse.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = downloadUrl;
+                    link.download = 'Better-Sakura-main.zip';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(downloadUrl);
+                    updateOverlay.remove();
+                } catch (error) {
+                    window.open('https://github.com/Whitzzscott/Better-Sakura/archive/refs/heads/main.zip', '_blank');
+                    updateOverlay.remove();
+                }
+            };
+
+            document.getElementById('manualUpdate').onclick = () => {
+                window.open('https://github.com/Whitzzscott/Better-Sakura', '_blank');
+                updateOverlay.remove();
+            };
+
+            document.getElementById('cancelUpdate').onclick = () => {
+                updateOverlay.remove();
+            };
+        } else {
+            alert('You are already on the latest version!');
+        }
+    } catch (error) {
+        window.open('https://github.com/Whitzzscott/Better-Sakura/archive/refs/heads/main.zip', '_blank');
+    }
+};
+
+overlayContent.appendChild(updateButton);
 
 };
 
@@ -910,6 +1099,8 @@ async function submitPrompt(requestData) {
         requestArea.textContent = "An error occurred. Please try again.";
     }
 }
+
+
 
 floatingUI.appendChild(promptLibraryButton);
 floatingUI.appendChild(autoLoadButton);
@@ -1102,9 +1293,52 @@ function adjustGuiForSmallScreens() {
         if (e.matches) {
             document.documentElement.style.fontSize = '12px';
             document.documentElement.style.padding = '5px';
+            
+            const floatingUI = document.querySelector('.floating-ui');
+            if (floatingUI) {
+                floatingUI.style.transform = 'scale(0.8)';
+                floatingUI.style.right = '10px';
+                floatingUI.style.bottom = '10px';
+                
+                const buttons = floatingUI.querySelectorAll('button');
+                buttons.forEach(button => {
+                    button.style.padding = '6px 10px';
+                    button.style.fontSize = '11px';
+                    button.style.margin = '3px';
+                });
+
+                const minimizeBtn = floatingUI.querySelector('minimizeButton');
+                if (minimizeBtn) {
+                    minimizeBtn.style.padding = '4px 8px';
+                    minimizeBtn.style.fontSize = '10px';
+                    minimizeBtn.style.minWidth = '20px';
+                }
+            }
+            
         } else {
             document.documentElement.style.fontSize = '16px';
             document.documentElement.style.padding = '10px';
+            
+            const floatingUI = document.querySelector('.floating-ui');
+            if (floatingUI) {
+                floatingUI.style.transform = 'scale(1)';
+                floatingUI.style.right = '20px';
+                floatingUI.style.bottom = '20px';
+                
+                const buttons = floatingUI.querySelectorAll('button');
+                buttons.forEach(button => {
+                    button.style.padding = '8px 12px';
+                    button.style.fontSize = '14px';
+                    button.style.margin = '5px';
+                });
+
+                const minimizeBtn = floatingUI.querySelector('minimizeButton');
+                if (minimizeBtn) {
+                    minimizeBtn.style.padding = '6px 10px';
+                    minimizeBtn.style.fontSize = '12px';
+                    minimizeBtn.style.minWidth = '24px';
+                }
+            }
         }
     }
     mediaQuery.addListener(handleScreenChange);
