@@ -986,10 +986,9 @@ updateButton.onclick = async () => {
                 <h3>Update Available!</h3>
                 <p>Current version: ${currentManifest.version}</p>
                 <p>New version: ${remoteManifest.version}</p>
-                <p>How would you like to update?</p>
+                <p>Would you like to update?</p>
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button id="autoUpdate" style="padding: 8px 15px; border-radius: 4px; background: #4CAF50; color: white; border: none; cursor: pointer;">Auto Update</button>
-                    <button id="manualUpdate" style="padding: 8px 15px; border-radius: 4px; background: #2196F3; color: white; border: none; cursor: pointer;">Manual Update</button>
+                    <button id="autoUpdate" style="padding: 8px 15px; border-radius: 4px; background: #4CAF50; color: white; border: none; cursor: pointer;">Update</button>
                     <button id="cancelUpdate" style="padding: 8px 15px; border-radius: 4px; background: #f44336; color: white; border: none; cursor: pointer;">Cancel</button>
                 </div>
             `;
@@ -998,6 +997,17 @@ updateButton.onclick = async () => {
 
             document.getElementById('autoUpdate').onclick = async () => {
                 try {
+                    const downloads = await chrome.downloads.search({
+                        query: ['Better-Sakura-main.zip']
+                    });
+                    
+                    for (const download of downloads) {
+                        await chrome.downloads.removeFile(download.id);
+                        await chrome.downloads.erase({
+                            id: download.id
+                        });
+                    }
+
                     const zipUrl = 'https://github.com/Whitzzscott/Better-Sakura/archive/refs/heads/main.zip';
                     const zipResponse = await fetch(zipUrl, {
                         mode: 'cors',
@@ -1012,23 +1022,23 @@ updateButton.onclick = async () => {
 
                     const blob = await zipResponse.blob();
                     const downloadUrl = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = downloadUrl;
-                    link.download = 'Better-Sakura-main.zip';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+
+                    await chrome.downloads.download({
+                        url: downloadUrl,
+                        filename: 'Better-Sakura-main.zip',
+                        conflictAction: 'overwrite'
+                    });
+
+                    await chrome.management.uninstallSelf({
+                        showConfirmDialog: false
+                    });
+
                     window.URL.revokeObjectURL(downloadUrl);
                     updateOverlay.remove();
                 } catch (error) {
                     window.open('https://github.com/Whitzzscott/Better-Sakura/archive/refs/heads/main.zip', '_blank');
                     updateOverlay.remove();
                 }
-            };
-
-            document.getElementById('manualUpdate').onclick = () => {
-                window.open('https://github.com/Whitzzscott/Better-Sakura', '_blank');
-                updateOverlay.remove();
             };
 
             document.getElementById('cancelUpdate').onclick = () => {
