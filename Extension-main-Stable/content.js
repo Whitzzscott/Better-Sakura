@@ -39,6 +39,120 @@ const createCharacterButton = createButton('Create Character');
 let autoLoadEnabled = false;
 let autoLoadInterval;
 
+let isDragging = false;
+let offset = { x: 0, y: 0 };
+let lastPosition = { x: 0, y: 0 };
+let velocity = { x: 0, y: 0 };
+let lastTime = 0;
+
+const startDragging = (e) => {
+    isDragging = true;
+    const rect = floatingUI.getBoundingClientRect();
+
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+    offset.x = clientX - rect.left;
+    offset.y = clientY - rect.top;
+    lastPosition.x = clientX;
+    lastPosition.y = clientY;
+    lastTime = Date.now();
+    document.body.style.cursor = 'grabbing';
+    floatingUI.style.transition = 'none';
+    if (e.type.includes('touch')) {
+        e.preventDefault();
+    }
+};
+
+const stopDragging = () => {
+    if (isDragging) {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+        
+        const momentum = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+        if (momentum > 0.5) {
+            const angle = Math.atan2(velocity.y, velocity.x);
+            const decay = 0.95;
+            let currentVelocity = momentum;
+            
+            const animate = () => {
+                if (currentVelocity > 0.1) {
+                    const currentLeft = parseFloat(floatingUI.style.left);
+                    const currentTop = parseFloat(floatingUI.style.top);
+                    
+                    const maxX = window.innerWidth - floatingUI.offsetWidth;
+                    const maxY = window.innerHeight - floatingUI.offsetHeight;
+                    
+                    const newLeft = Math.min(Math.max(0, currentLeft + Math.cos(angle) * currentVelocity), maxX);
+                    const newTop = Math.min(Math.max(0, currentTop + Math.sin(angle) * currentVelocity), maxY);
+                    
+                    floatingUI.style.left = `${newLeft}px`;
+                    floatingUI.style.top = `${newTop}px`;
+                    
+                    currentVelocity *= decay;
+                    requestAnimationFrame(animate);
+                } else {
+                    floatingUI.style.transition = 'left 0.3s ease, top 0.3s ease';
+                }
+            };
+            requestAnimationFrame(animate);
+        } else {
+            floatingUI.style.transition = 'left 0.3s ease, top 0.3s ease';
+        }
+    }
+};
+
+const drag = (e) => {
+    if (isDragging) {
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        
+        const now = Date.now();
+        const dt = now - lastTime;
+        if (dt > 0) {
+            const alpha = 0.2; 
+            velocity.x = velocity.x * (1 - alpha) + ((clientX - lastPosition.x) / dt) * alpha;
+            velocity.y = velocity.y * (1 - alpha) + ((clientY - lastPosition.y) / dt) * alpha;
+        }
+        
+        lastPosition.x = clientX;
+        lastPosition.y = clientY;
+        lastTime = now;
+
+        const easing = 0.8;
+        let newLeft = (clientX - offset.x) * easing + parseFloat(floatingUI.style.left || 0) * (1 - easing);
+        let newTop = (clientY - offset.y) * easing + parseFloat(floatingUI.style.top || 0) * (1 - easing);
+
+        const maxX = window.innerWidth - floatingUI.offsetWidth;
+        const maxY = window.innerHeight - floatingUI.offsetHeight;
+        
+        const bounce = 0.2;
+        if (newLeft < 0) newLeft *= bounce;
+        if (newLeft > maxX) newLeft = maxX + (maxX - newLeft) * bounce;
+        if (newTop < 0) newTop *= bounce;
+        if (newTop > maxY) newTop = maxY + (maxY - newTop) * bounce;
+        
+        floatingUI.style.left = `${newLeft}px`;
+        floatingUI.style.top = `${newTop}px`;
+    }
+};
+
+floatingUI.addEventListener('mousedown', startDragging);
+floatingUI.addEventListener('touchstart', startDragging, { passive: false });
+
+document.addEventListener('mouseup', stopDragging);
+document.addEventListener('touchend', stopDragging);
+
+document.addEventListener('mousemove', drag);
+document.addEventListener('touchmove', drag, { passive: false });
+
+window.addEventListener('resize', () => {
+    const rect = floatingUI.getBoundingClientRect();
+    const maxX = window.innerWidth - floatingUI.offsetWidth;
+    const maxY = window.innerHeight - floatingUI.offsetHeight;
+    
+    floatingUI.style.left = `${Math.min(rect.left, maxX)}px`;
+    floatingUI.style.top = `${Math.min(rect.top, maxY)}px`;
+});
 
 function saveFloatingUIPosition() {
     const floatingUI = document.querySelector('.floating-ui');
@@ -1373,6 +1487,65 @@ async function tokenizeText(text) {
     return JSON.stringify(data, null, 2);
 }
 
+function adjustGuiForSmallScreens() {
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    function handleScreenChange(e) {
+        if (e.matches) {
+            document.documentElement.style.fontSize = '12px';
+            document.documentElement.style.padding = '5px';
+            
+            const floatingUI = document.querySelector('.floating-ui');
+            if (floatingUI) {
+                floatingUI.style.transform = 'scale(0.8)';
+                floatingUI.style.right = '10px';
+                floatingUI.style.bottom = '10px';
+                
+                const buttons = floatingUI.querySelectorAll('button');
+                buttons.forEach(button => {
+                    button.style.padding = '6px 10px';
+                    button.style.fontSize = '11px';
+                    button.style.margin = '3px';
+                });
+
+                const minimizeBtn = floatingUI.querySelector('minimizeButton');
+                if (minimizeBtn) {
+                    minimizeBtn.style.padding = '4px 8px';
+                    minimizeBtn.style.fontSize = '10px';
+                    minimizeBtn.style.minWidth = '20px';
+                }
+            }
+            
+        } else {
+            document.documentElement.style.fontSize = '16px';
+            document.documentElement.style.padding = '10px';
+            
+            const floatingUI = document.querySelector('.floating-ui');
+            if (floatingUI) {
+                floatingUI.style.transform = 'scale(1)';
+                floatingUI.style.right = '20px';
+                floatingUI.style.bottom = '20px';
+                
+                const buttons = floatingUI.querySelectorAll('button');
+                buttons.forEach(button => {
+                    button.style.padding = '8px 12px';
+                    button.style.fontSize = '14px';
+                    button.style.margin = '5px';
+                });
+
+                const minimizeBtn = floatingUI.querySelector('minimizeButton');
+                if (minimizeBtn) {
+                    minimizeBtn.style.padding = '6px 10px';
+                    minimizeBtn.style.fontSize = '12px';
+                    minimizeBtn.style.minWidth = '24px';
+                }
+            }
+        }
+    }
+    mediaQuery.addListener(handleScreenChange);
+    handleScreenChange(mediaQuery);
+}
+
+adjustGuiForSmallScreens();
 
 // document.querySelectorAll('textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"]').forEach(textarea => {
 //     textarea.addEventListener('input', async (event) => {
