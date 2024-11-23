@@ -47,9 +47,9 @@ let touchStartY = 0;
 let isScrolling = false;
 let initialTouchDistance = 0;
 let initialScale = 1;
+let bouncingEnabled = localStorage.getItem('bouncingEnabled') !== 'false';
 
 const startDragging = (e) => {
-    // Allow scrolling if target is scrollable content
     if (e.target.closest('.scrollable-content')) {
         return;
     }
@@ -91,6 +91,10 @@ const stopDragging = () => {
     isDragging = false;
     isScrolling = false;
     document.body.style.cursor = 'default';
+    
+    if (!bouncingEnabled) {
+        return;
+    }
     
     const deceleration = 0.95;
     const bounceFactor = -0.7;
@@ -137,7 +141,6 @@ const stopDragging = () => {
 };
 
 const drag = (e) => {
-    // Allow scrolling if target is scrollable content
     if (e.target.closest('.scrollable-content')) {
         return;
     }
@@ -203,8 +206,8 @@ document.addEventListener('touchmove', drag, { passive: true });
 
 function saveFloatingUIPosition() {
     const position = {
-        top: floatingUI.style.top,
-        left: floatingUI.style.left
+        top: floatingUI.style.top || '0px',
+        left: floatingUI.style.left || '0px'
     };
     chrome.storage.sync.set({ floatingUIPosition: position });
 }
@@ -212,8 +215,8 @@ function saveFloatingUIPosition() {
 function restoreFloatingUIPosition() {
     chrome.storage.sync.get(['floatingUIPosition'], (result) => {
         if (result.floatingUIPosition) {
-            floatingUI.style.top = result.floatingUIPosition.top;
-            floatingUI.style.left = result.floatingUIPosition.left;
+            floatingUI.style.top = result.floatingUIPosition.top || '0px';
+            floatingUI.style.left = result.floatingUIPosition.left || '0px';
         }
     });
 }
@@ -426,34 +429,81 @@ const createOverlay = (title, contentElements) => {
 
 const showPromptOverlay = () => {
     const overlayContent = document.createElement('div');
+    overlayContent.style.backgroundColor = '#2c2c2c';
+    overlayContent.style.borderRadius = '10px';
+    overlayContent.style.padding = '20px';
+    overlayContent.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
+    overlayContent.style.maxWidth = '500px';
+    overlayContent.style.margin = 'auto';
+    
+    const title = document.createElement('h2');
+    title.textContent = 'Manage Your Prompts';
+    title.style.color = '#ffffff';
+    title.style.textAlign = 'center';
+    title.style.marginBottom = '15px';
+    
     const promptList = document.createElement('ul');
     promptList.style.maxHeight = '400px';
     promptList.style.overflowY = 'auto';
     promptList.style.margin = '0';
     promptList.style.padding = '0';
     promptList.style.listStyle = 'none';
+    promptList.style.color = '#ffffff';
 
     const newPromptInput = document.createElement('input');
     Object.assign(newPromptInput.style, {
         width: '100%',
-        padding: '10px',
+        padding: '12px',
         borderRadius: '5px', 
-        border: '1px solid #ccc',
+        border: '1px solid #888',
         marginBottom: '10px',
         fontSize: '16px',
-        color: 'white',
-        backgroundColor: '#444'
+        color: '#ffffff',
+        backgroundColor: '#444',
+        transition: 'border 0.3s',
     });
     newPromptInput.placeholder = 'Enter new prompt...';
+    newPromptInput.addEventListener('focus', () => {
+        newPromptInput.style.border = '1px solid #4CAF50';
+    });
+    newPromptInput.addEventListener('blur', () => {
+        newPromptInput.style.border = '1px solid #888';
+    });
 
     const addPromptButton = createButton('Add Prompt');
+    Object.assign(addPromptButton.style, {
+        backgroundColor: '#4CAF50',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
+    });
+    addPromptButton.onmouseover = () => {
+        addPromptButton.style.backgroundColor = '#45a049';
+    };
+    addPromptButton.onmouseout = () => {
+        addPromptButton.style.backgroundColor = '#4CAF50';
+    };
+
     const loadMoreButton = createButton('Load More');
     Object.assign(loadMoreButton.style, {
         width: '100%',
         marginTop: '10px',
-        backgroundColor: '#4CAF50',
-        display: 'none'
+        backgroundColor: '#007BFF',
+        color: 'white',
+        display: 'none',
+        padding: '10px',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
     });
+    loadMoreButton.onmouseover = () => {
+        loadMoreButton.style.backgroundColor = '#0056b3';
+    };
+    loadMoreButton.onmouseout = () => {
+        loadMoreButton.style.backgroundColor = '#007BFF';
+    };
 
     let currentPromptCount = 10;
     const PROMPTS_PER_PAGE = 10;
@@ -473,9 +523,16 @@ const showPromptOverlay = () => {
                 padding: '10px',
                 borderRadius: '5px',
                 backgroundColor: '#555',
-                wordBreak: 'break-word'
+                wordBreak: 'break-word',
+                transition: 'background-color 0.3s',
             });
             promptItem.textContent = prompt.text;
+            promptItem.onmouseover = () => {
+                promptItem.style.backgroundColor = '#666';
+            };
+            promptItem.onmouseout = () => {
+                promptItem.style.backgroundColor = '#555';
+            };
 
             const buttonContainer = document.createElement('div');
             Object.assign(buttonContainer.style, {
@@ -513,7 +570,14 @@ const showPromptOverlay = () => {
             };
 
             const removeButton = createButton('Remove');
-            removeButton.style.backgroundColor = '#f44336';
+            Object.assign(removeButton.style, {
+                backgroundColor: '#f44336',
+                color: 'white',
+                padding: '5px',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s',
+            });
             removeButton.onclick = (e) => {
                 e.stopPropagation();
                 const updatedPrompts = storedPrompts.filter(p => p.text !== prompt.text);
@@ -562,6 +626,7 @@ const showPromptOverlay = () => {
 
     loadPrompts();
 
+    overlayContent.appendChild(title);
     overlayContent.appendChild(newPromptInput);
     overlayContent.appendChild(addPromptButton);
     overlayContent.appendChild(promptList);
@@ -1063,6 +1128,216 @@ updateButton.onclick = async () => {
 
 overlayContent.appendChild(updateButton);
 
+const bouncingButton = createButton('Toggle Bouncing');
+bouncingButton.onclick = () => {
+    const currentBouncing = localStorage.getItem('bouncingEnabled') !== 'false';
+    localStorage.setItem('bouncingEnabled', !currentBouncing);
+    bouncingButton.textContent = currentBouncing ? 'Enable Bouncing' : 'Disable Bouncing';
+    bouncingEnabled = !currentBouncing;
+};
+
+overlayContent.appendChild(bouncingButton);
+const createAnimationCustomizer = () => {
+    const customizeButton = createButton('Custom CSS Editor');
+    customizeButton.onclick = () => {
+        const customizeOverlay = document.createElement('div');
+        customizeOverlay.style.padding = '25px';
+        customizeOverlay.style.width = '800px';
+        customizeOverlay.style.height = '90vh';
+        customizeOverlay.style.display = 'flex';
+        customizeOverlay.style.flexDirection = 'column';
+        customizeOverlay.style.gap = '20px';
+
+        const predefinedSection = document.createElement('div');
+        predefinedSection.style.flex = '0 0 auto';
+
+        const predefinedTitle = document.createElement('h3');
+        predefinedTitle.textContent = 'Preset Styles';
+        predefinedTitle.style.color = '#fff';
+        predefinedTitle.style.marginBottom = '15px';
+        predefinedTitle.style.fontSize = '18px';
+        predefinedSection.appendChild(predefinedTitle);
+
+        const presets = [
+            { name: 'Modern Dark', code: '.button { background: #2d2d2d; color: #fff; border-radius: 8px; transition: all 0.3s; } .button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }' },
+            { name: 'Glassmorphism', code: '.element { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; }' },
+            { name: 'Neon Glow', code: '.element { color: #fff; text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00; box-shadow: 0 0 10px #00ff00; transition: all 0.3s; }' },
+            { name: 'Smooth Animations', code: '.element { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); } .element:hover { transform: scale(1.05); }' },
+            { name: 'Neumorphic', code: '.element { background: #e0e0e0; box-shadow: 8px 8px 16px #bebebe, -8px -8px 16px #ffffff; border-radius: 10px; }' },
+            { name: 'Gradient Border', code: '.element { border: 2px solid transparent; background: linear-gradient(#000, #000) padding-box, linear-gradient(45deg, #ff0099, #00ff99) border-box; border-radius: 15px; }' }
+        ];
+
+        const presetSelect = document.createElement('select');
+        presetSelect.style.width = '100%';
+        presetSelect.style.padding = '10px';
+        presetSelect.style.backgroundColor = '#2d2d2d';
+        presetSelect.style.color = '#fff';
+        presetSelect.style.border = '1px solid #555';
+        presetSelect.style.borderRadius = '6px';
+        presetSelect.style.cursor = 'pointer';
+
+        presets.forEach(preset => {
+            const option = document.createElement('option');
+            option.value = preset.code;
+            option.textContent = preset.name;
+            presetSelect.appendChild(option);
+        });
+
+        predefinedSection.appendChild(presetSelect);
+
+        const editorSection = document.createElement('div');
+        editorSection.style.flex = '1';
+        editorSection.style.display = 'flex';
+        editorSection.style.flexDirection = 'column';
+        editorSection.style.gap = '15px';
+        editorSection.style.minHeight = '0';
+
+        const editorTitle = document.createElement('h3');
+        editorTitle.textContent = 'CSS Editor';
+        editorTitle.style.color = '#fff';
+        editorTitle.style.fontSize = '18px';
+        editorSection.appendChild(editorTitle);
+
+        const codeEditor = document.createElement('textarea');
+        codeEditor.style.flex = '1';
+        codeEditor.style.padding = '15px';
+        codeEditor.style.backgroundColor = '#1a1a1a';
+        codeEditor.style.color = '#fff';
+        codeEditor.style.border = '1px solid #444';
+        codeEditor.style.borderRadius = '8px';
+        codeEditor.style.fontFamily = 'Monaco, Consolas, monospace';
+        codeEditor.style.fontSize = '14px';
+        codeEditor.style.lineHeight = '1.5';
+        codeEditor.style.resize = 'none';
+        codeEditor.spellcheck = false;
+        codeEditor.value = localStorage.getItem('customCSS') || presets[0].code;
+
+        const syntaxGuide = document.createElement('div');
+        syntaxGuide.style.backgroundColor = '#1d1d1d';
+        syntaxGuide.style.padding = '15px';
+        syntaxGuide.style.borderRadius = '8px';
+        syntaxGuide.innerHTML = `
+            <p style="color: #aaa; margin: 0 0 10px 0; font-size: 14px;">CSS Guide:</p>
+            <pre style="color: #888; margin: 0; font-size: 13px;">
+/* Basic Selector Examples */
+.class-name { property: value; }
+#id-name { property: value; }
+element { property: value; }
+
+/* Common Properties */
+- background, color, border
+- margin, padding, width, height
+- transform, transition, animation
+- display, position, flex, grid
+- box-shadow, text-shadow
+- font-size, font-family, font-weight</pre>
+        `;
+
+        const highlightSyntax = (css) => {
+            const highlighted = css
+                .replace(/(\/\*[\s\S]*?\*\/|\/\/.*)/g, '<span style="color: #6a9955;">$1</span>') // Comments
+                .replace(/(\b(?:color|background|border|margin|padding|width|height|transform|transition|animation|display|position|flex|grid|box-shadow|text-shadow|font-size|font-family|font-weight)\b)/g, '<span style="color: #569cd6;">$1</span>') // Properties
+                .replace(/([a-zA-Z-]+)(\s*:\s*[^;]*;)/g, '<span style="color: #d69d85;">$1</span>$2'); // Selectors
+            return highlighted;
+        };
+
+        const errorHighlight = (css) => {
+            const lines = css.split('\n');
+            const errorLines = lines.map((line, index) => {
+                return line.includes(';') ? line : `<span style="color: #ff0000;">${line} // Error: Missing semicolon</span>`;
+            });
+            return errorLines.join('\n');
+        };
+
+        const displayErrors = () => {
+            const errorOutput = document.createElement('pre');
+            errorOutput.style.color = '#ff0000';
+            errorOutput.style.backgroundColor = '#1d1d1d';
+            errorOutput.style.padding = '10px';
+            errorOutput.style.borderRadius = '8px';
+            errorOutput.textContent = errorHighlight(codeEditor.value);
+            editorSection.appendChild(errorOutput);
+        };
+
+        presetSelect.onchange = () => {
+            codeEditor.value = presetSelect.value;
+            localStorage.setItem('customCSS', presetSelect.value);
+            applyCSS(presetSelect.value);
+        };
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.gap = '10px';
+
+        const applyButton = document.createElement('button');
+        applyButton.textContent = 'Apply CSS';
+        applyButton.style.padding = '12px 20px';
+        applyButton.style.backgroundColor = '#4CAF50';
+        applyButton.style.color = '#fff';
+        applyButton.style.border = 'none';
+        applyButton.style.borderRadius = '6px';
+        applyButton.style.cursor = 'pointer';
+        applyButton.style.fontWeight = 'bold';
+        applyButton.style.transition = 'all 0.2s';
+
+        const resetButton = document.createElement('button');
+        resetButton.textContent = 'Reset';
+        resetButton.style.padding = '12px 20px';
+        resetButton.style.backgroundColor = '#ff4444';
+        resetButton.style.color = '#fff';
+        resetButton.style.border = 'none';
+        resetButton.style.borderRadius = '6px';
+        resetButton.style.cursor = 'pointer';
+        resetButton.style.fontWeight = 'bold';
+        resetButton.style.transition = 'all 0.2s';
+
+        const applyCSS = (css) => {
+            const existingStyle = document.getElementById('custom-css');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'custom-css';
+            styleSheet.textContent = css;
+            document.head.appendChild(styleSheet);
+        };
+
+        applyButton.onclick = () => {
+            const css = codeEditor.value;
+            localStorage.setItem('customCSS', css);
+            applyCSS(css);
+            displayErrors();
+        };
+
+        resetButton.onclick = () => {
+            codeEditor.value = presets[0].code;
+            localStorage.removeItem('customCSS');
+            applyCSS(presets[0].code);
+        };
+
+        buttonContainer.appendChild(applyButton);
+        buttonContainer.appendChild(resetButton);
+
+        editorSection.appendChild(syntaxGuide);
+        editorSection.appendChild(codeEditor);
+        editorSection.appendChild(buttonContainer);
+
+        customizeOverlay.appendChild(predefinedSection);
+        customizeOverlay.appendChild(editorSection);
+
+        createOverlay('Custom CSS Editor', [customizeOverlay]);
+
+        const storedCSS = localStorage.getItem('customCSS');
+        if (storedCSS) {
+            applyCSS(storedCSS);
+        }
+    };
+
+    return customizeButton;
+};
+
+const customCSSButton = createAnimationCustomizer();
+overlayContent.appendChild(customCSSButton);
 };
 
 settingsButton.addEventListener('click', showSettingsOverlay);
@@ -1214,119 +1489,6 @@ async function submitPrompt(requestData) {
         requestArea.textContent = "An error occurred. Please try again.";
     }
 }
-const createAnimationCustomizer = () => {
-    const customizeButton = createButton('Customize Animations');
-    customizeButton.onclick = () => {
-        const customizeOverlay = document.createElement('div');
-        customizeOverlay.style.padding = '20px';
-        customizeOverlay.style.maxWidth = '600px';
-        customizeOverlay.style.maxHeight = '80vh';
-        customizeOverlay.style.overflowY = 'auto';
-
-        const predefinedSection = document.createElement('div');
-        predefinedSection.style.marginBottom = '30px';
-
-        const predefinedTitle = document.createElement('h3');
-        predefinedTitle.textContent = 'Animation Code Editor';
-        predefinedTitle.style.color = '#fff';
-        predefinedTitle.style.marginBottom = '15px';
-        predefinedSection.appendChild(predefinedTitle);
-
-        const codeEditor = document.createElement('textarea');
-        codeEditor.style.width = '100%';
-        codeEditor.style.height = '300px';
-        codeEditor.style.padding = '12px';
-        codeEditor.style.backgroundColor = '#2d2d2d';
-        codeEditor.style.color = '#fff';
-        codeEditor.style.border = '1px solid #555';
-        codeEditor.style.borderRadius = '4px';
-        codeEditor.style.fontFamily = 'monospace';
-        codeEditor.style.marginBottom = '15px';
-        codeEditor.placeholder = `Button {
-    animation: bounce 0.5s;
-    hover: scale(1.1);
-    active: translateY(2px);
-}
-
-Page {
-    enter: fadeIn 0.3s ease;
-    exit: fadeOut 0.3s ease;
-    transition: slide 0.5s;
-}`;
-
-        const applyButton = document.createElement('button');
-        applyButton.textContent = 'Apply Animations';
-        applyButton.style.padding = '10px';
-        applyButton.style.backgroundColor = '#4CAF50';
-        applyButton.style.color = '#fff';
-        applyButton.style.border = 'none';
-        applyButton.style.borderRadius = '4px';
-        applyButton.style.cursor = 'pointer';
-        applyButton.style.marginTop = '15px';
-
-        applyButton.onclick = () => {
-            const code = codeEditor.value;
-            const buttonMatch = code.match(/Button\s*{([^}]*)}/);
-            const pageMatch = code.match(/Page\s*{([^}]*)}/);
-
-            if (buttonMatch) {
-                const buttonStyles = buttonMatch[1].trim().split('\n');
-                const styleSheet = document.createElement('style');
-                let buttonCSS = '';
-
-                buttonStyles.forEach(style => {
-                    const [property, value] = style.split(':').map(s => s.trim());
-                    if (property === 'animation') {
-                        buttonCSS += `button { animation: ${value}; }\n`;
-                    } else if (property === 'hover') {
-                        buttonCSS += `button:hover { transform: ${value}; }\n`;
-                    } else if (property === 'active') {
-                        buttonCSS += `button:active { transform: ${value}; }\n`;
-                    }
-                });
-
-                styleSheet.textContent = buttonCSS;
-                document.head.appendChild(styleSheet);
-            }
-
-            if (pageMatch) {
-                const pageStyles = pageMatch[1].trim().split('\n');
-                const styleSheet = document.createElement('style');
-                let pageCSS = '';
-
-                pageStyles.forEach(style => {
-                    const [property, value] = style.split(':').map(s => s.trim());
-                    if (property === 'enter') {
-                        pageCSS += `@keyframes pageEnter { from { opacity: 0; } to { opacity: 1; } }\n`;
-                        pageCSS += `.page-enter { animation: ${value}; }\n`;
-                    } else if (property === 'exit') {
-                        pageCSS += `@keyframes pageExit { from { opacity: 1; } to { opacity: 0; } }\n`;
-                        pageCSS += `.page-exit { animation: ${value}; }\n`;
-                    } else if (property === 'transition') {
-                        pageCSS += `.page-transition { transition: ${value}; }\n`;
-                    }
-                });
-
-                styleSheet.textContent = pageCSS;
-                document.head.appendChild(styleSheet);
-            }
-
-            localStorage.setItem('customAnimationCode', code);
-        };
-
-        predefinedSection.appendChild(codeEditor);
-        predefinedSection.appendChild(applyButton);
-        customizeOverlay.appendChild(predefinedSection);
-
-        createOverlay('Animation Customizer', [customizeOverlay]);
-    };
-
-    return customizeButton;
-};
-
-const animationCustomizerButton = createAnimationCustomizer();
-floatingUI.appendChild(animationCustomizerButton);
-
 
 floatingUI.appendChild(promptLibraryButton);
 floatingUI.appendChild(autoLoadButton);
