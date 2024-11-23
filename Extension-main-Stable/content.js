@@ -44,23 +44,43 @@ let offset = { x: 0, y: 0 };
 let lastPosition = { x: 0, y: 0 };
 let velocity = { x: 0, y: 0 };
 let lastTime = 0;
+let touchStartY = 0;
+let isScrolling = false;
 
 const startDragging = (e) => {
-    isDragging = true;
-    const rect = floatingUI.getBoundingClientRect();
-    offset.x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    offset.y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-    lastPosition.x = rect.left;
-    lastPosition.y = rect.top;
-    lastTime = Date.now();
-    document.body.style.cursor = 'grabbing';
-    floatingUI.style.transition = 'none';
-    floatingUI.style.transform = 'scale(1.02)';
+    if (e.touches) {
+        touchStartY = e.touches[0].pageY;
+        setTimeout(() => {
+            if (!isScrolling) {
+                isDragging = true;
+                const rect = floatingUI.getBoundingClientRect();
+                offset.x = e.touches[0].clientX - rect.left;
+                offset.y = e.touches[0].clientY - rect.top;
+                lastPosition.x = rect.left;
+                lastPosition.y = rect.top;
+                lastTime = Date.now();
+                floatingUI.style.transition = 'none';
+                floatingUI.style.transform = 'scale(1.02)';
+            }
+        }, 50);
+    } else {
+        isDragging = true;
+        const rect = floatingUI.getBoundingClientRect();
+        offset.x = e.clientX - rect.left;
+        offset.y = e.clientY - rect.top;
+        lastPosition.x = rect.left;
+        lastPosition.y = rect.top;
+        lastTime = Date.now();
+        document.body.style.cursor = 'grabbing';
+        floatingUI.style.transition = 'none';
+        floatingUI.style.transform = 'scale(1.02)';
+    }
 };
 
 const stopDragging = () => {
     if (!isDragging) return;
     isDragging = false;
+    isScrolling = false;
     document.body.style.cursor = 'default';
     floatingUI.style.transform = 'scale(1)';
     
@@ -108,6 +128,18 @@ const stopDragging = () => {
 
 const drag = (e) => {
     if (!isDragging) return;
+    
+    if (e.touches) {
+        const touchDeltaY = Math.abs(e.touches[0].pageY - touchStartY);
+        if (!isScrolling && touchDeltaY > 10) {
+            isScrolling = true;
+            isDragging = false;
+            floatingUI.style.transform = 'scale(1)';
+            return;
+        }
+        if (isScrolling) return;
+    }
+    
     e.preventDefault();
     
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -149,7 +181,7 @@ const drag = (e) => {
 };
 
 floatingUI.addEventListener('mousedown', startDragging);
-floatingUI.addEventListener('touchstart', startDragging, { passive: false });
+floatingUI.addEventListener('touchstart', startDragging, { passive: true });
 
 document.addEventListener('mouseup', stopDragging);
 document.addEventListener('touchend', stopDragging);
