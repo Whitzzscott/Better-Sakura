@@ -975,8 +975,8 @@ textareas.forEach(async textarea => {
         try {
             const tokenizedData = await tokenizeText(text || " "); 
             const parsedData = JSON.parse(tokenizedData);
-            const tokenCount = parsedData["🧮 Total Token Count 🧮"];
-            const wordCount = parsedData["💬 Word Count 💬"];
+            const tokenCount = parsedData["🧮 Total Token Count 🧮"] || 0;
+            const wordCount = parsedData["💬 Word Count 💬"] || 0;
 
             overlayTags.forEach(tag => tag.remove());
             overlayTags = [];
@@ -1006,14 +1006,17 @@ textareas.forEach(async textarea => {
             overlayTags = [];
             console.error('Error processing text:', error);
         }
-        
+    };
+
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
                 const pTag = textarea.parentNode.querySelector('p');
                 if (window.location.pathname.includes('/tokenize') || localStorage.getItem('showPTag') === 'true') {
-                    pTag.style.opacity = '1';
-                    pTag.style.transform = 'translateY(10px)';
+                    if (pTag) {
+                        pTag.style.opacity = '1';
+                        pTag.style.transform = 'translateY(10px)';
+                    }
                 }
             }
         });
@@ -1024,21 +1027,17 @@ textareas.forEach(async textarea => {
         attributeFilter: ['value']
     });
 
-    const originalSetValue = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
-    Object.defineProperty(textarea, 'value', {
-        set: function(val) {
-            originalSetValue.call(this, val);
-            const pTag = this.parentNode.querySelector('p');
-            if (window.location.pathname.includes('/tokenize') || localStorage.getItem('showPTag') === 'true') {
-                pTag.style.opacity = '1';
-                pTag.style.transform = 'translateY(10px)'; // Move slightly below textarea
-                localStorage.setItem('showPTag', 'true');
-            }
+    // Remove property redefinition that was causing the error
+    textarea.addEventListener('change', function() {
+        const pTag = this.parentNode.querySelector('p');
+        if (pTag && (window.location.pathname.includes('/tokenize') || localStorage.getItem('showPTag') === 'true')) {
+            pTag.style.opacity = '1';
+            pTag.style.transform = 'translateY(10px)';
+            localStorage.setItem('showPTag', 'true');
         }
     });
-    };
 
-    await processText(); 
+    await processText();
 
     textarea.addEventListener('input', processText);
 
@@ -1057,6 +1056,10 @@ if (instructionPTag) {
 }
 
 async function tokenizeText(text) {
+    if (!text || text.trim().length === 0) {
+        return JSON.stringify({ error: "Empty or invalid input" }, null, 2);
+    }
+
     const API_URL = 'https://tiktoken-2nt2.onrender.com/tokenize';
     const AUTH_HEADER = 'Bearer SSS155';
     const response = await fetch(API_URL, {
@@ -1065,7 +1068,7 @@ async function tokenizeText(text) {
             'Content-Type': 'application/json',
             'Authorization': AUTH_HEADER
         },
-        body: JSON.stringify({ text: text })
+        body: JSON.stringify({ text: text.trim() })
     });
     const data = await response.json();
     return JSON.stringify(data, null, 2);
