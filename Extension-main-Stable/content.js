@@ -46,23 +46,29 @@ let velocity = { x: 0, y: 0 };
 let lastTime = 0;
 let touchStartY = 0;
 let isScrolling = false;
+let initialTouchDistance = 0;
+let initialScale = 1;
 
 const startDragging = (e) => {
     if (e.touches) {
+        if (e.touches.length === 2) {
+            initialTouchDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialScale = parseFloat(floatingUI.style.scale || 1);
+            return;
+        }
+
         touchStartY = e.touches[0].pageY;
-        setTimeout(() => {
-            if (!isScrolling) {
-                isDragging = true;
-                const rect = floatingUI.getBoundingClientRect();
-                offset.x = e.touches[0].clientX - rect.left;
-                offset.y = e.touches[0].clientY - rect.top;
-                lastPosition.x = rect.left;
-                lastPosition.y = rect.top;
-                lastTime = Date.now();
-                floatingUI.style.transition = 'none';
-                floatingUI.style.transform = 'scale(1.02)';
-            }
-        }, 50);
+        isDragging = true;
+        const rect = floatingUI.getBoundingClientRect();
+        offset.x = e.touches[0].clientX - rect.left;
+        offset.y = e.touches[0].clientY - rect.top;
+        lastPosition.x = rect.left;
+        lastPosition.y = rect.top;
+        lastTime = Date.now();
+        floatingUI.style.transition = 'none';
     } else {
         isDragging = true;
         const rect = floatingUI.getBoundingClientRect();
@@ -73,7 +79,6 @@ const startDragging = (e) => {
         lastTime = Date.now();
         document.body.style.cursor = 'grabbing';
         floatingUI.style.transition = 'none';
-        floatingUI.style.transform = 'scale(1.02)';
     }
 };
 
@@ -82,7 +87,6 @@ const stopDragging = () => {
     isDragging = false;
     isScrolling = false;
     document.body.style.cursor = 'default';
-    floatingUI.style.transform = 'scale(1)';
     
     const deceleration = 0.95;
     const animate = () => {
@@ -99,21 +103,8 @@ const stopDragging = () => {
         let newLeft = currentLeft + velocity.x;
         let newTop = currentTop + velocity.y;
         
-        if (newLeft < 0) {
-            newLeft = 0;
-            velocity.x = -velocity.x * 0.5;
-        } else if (newLeft > maxX) {
-            newLeft = maxX;
-            velocity.x = -velocity.x * 0.5;
-        }
-        
-        if (newTop < 0) {
-            newTop = 0;
-            velocity.y = -velocity.y * 0.5;
-        } else if (newTop > maxY) {
-            newTop = maxY;
-            velocity.y = -velocity.y * 0.5;
-        }
+        newLeft = Math.max(0, Math.min(maxX, newLeft));
+        newTop = Math.max(0, Math.min(maxY, newTop));
         
         floatingUI.style.left = `${newLeft}px`;
         floatingUI.style.top = `${newTop}px`;
@@ -127,20 +118,27 @@ const stopDragging = () => {
 };
 
 const drag = (e) => {
+    if (e.touches && e.touches.length === 2) {
+        e.preventDefault();
+        const currentDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        const scale = (currentDistance / initialTouchDistance) * initialScale;
+        floatingUI.style.scale = Math.max(0.5, Math.min(2, scale));
+        return;
+    }
+
     if (!isDragging) return;
     
     if (e.touches) {
         const touchDeltaY = Math.abs(e.touches[0].pageY - touchStartY);
-        if (!isScrolling && touchDeltaY > 10) {
-            isScrolling = true;
-            isDragging = false;
-            floatingUI.style.transform = 'scale(1)';
-            return;
+        if (touchDeltaY > 10) {
+            if (!e.touches[0].target.closest('.scrollable-content')) {
+                e.preventDefault();
+            }
         }
-        if (isScrolling) return;
     }
-    
-    e.preventDefault();
     
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -157,20 +155,8 @@ const drag = (e) => {
     const maxX = window.innerWidth - floatingUI.offsetWidth;
     const maxY = window.innerHeight - floatingUI.offsetHeight;
     
-    let boundedX = newX;
-    let boundedY = newY;
-    
-    if (newX < 0) {
-        boundedX = newX * 0.3;
-    } else if (newX > maxX) {
-        boundedX = maxX + (newX - maxX) * 0.3;
-    }
-    
-    if (newY < 0) {
-        boundedY = newY * 0.3;
-    } else if (newY > maxY) {
-        boundedY = maxY + (newY - maxY) * 0.3;
-    }
+    let boundedX = Math.max(0, Math.min(maxX, newX));
+    let boundedY = Math.max(0, Math.min(maxY, newY));
     
     floatingUI.style.left = `${boundedX}px`;
     floatingUI.style.top = `${boundedY}px`;
@@ -180,8 +166,10 @@ const drag = (e) => {
     lastTime = currentTime;
 };
 
+floatingUI.style.touchAction = 'pan-x pan-y';
+
 floatingUI.addEventListener('mousedown', startDragging);
-floatingUI.addEventListener('touchstart', startDragging, { passive: true });
+floatingUI.addEventListener('touchstart', startDragging, { passive: false });
 
 document.addEventListener('mouseup', stopDragging);
 document.addEventListener('touchend', stopDragging);
@@ -593,6 +581,7 @@ const makeTransparentButton = createButton('Make UI Transparent');
 
 makeTransparentButton.onclick = () => {
     floatingUI.style.backgroundColor = 'transparent';
+    floatingUI.style.boxShadow = 'none';
 };
 
 overlayContent.appendChild(makeTransparentButton);
