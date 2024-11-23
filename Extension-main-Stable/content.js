@@ -222,6 +222,12 @@ minimizeButton.onclick = () => {
     floatingUI.dataset.expanded = !isExpanded;
     minimizeButton.style.animation = isExpanded ? 'bounceOut 0.5s ease' : 'bounceIn 0.5s ease';
     minimizeButton.textContent = isExpanded ? '−' : '+';
+    
+    if (window.innerWidth <= 768) {
+        minimizeButton.style.backgroundSize = '40px 40px';
+    } else {
+        minimizeButton.style.backgroundSize = '50px 50px'; 
+    }
 };
 
 floatingUI.appendChild(minimizeButton);
@@ -250,18 +256,6 @@ createCharacterButton.addEventListener('click', () => {
     const creatingUrl = chrome.runtime.getURL('creating.html');
     window.open(creatingUrl, '_blank', 'width=600,height=400');
 });
-
-const sendTokenizerButton = createButton('Tokenizer');
-sendTokenizerButton.onclick = () => {
-    const tokenizerUrl = chrome.runtime.getURL('tokenizer.html');
-    if (window.chrome && window.chrome.runtime && window.chrome.runtime.openOptionsPage) {
-        window.chrome.runtime.openOptionsPage();
-    } else {
-        window.open(tokenizerUrl, '_blank', 'width=600,height=400');
-    }
-};
-floatingUI.appendChild(sendTokenizerButton);
-
 
 const createOverlay = (title, contentElements) => {
     const overlay = document.createElement('div');
