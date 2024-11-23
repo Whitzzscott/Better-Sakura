@@ -38,7 +38,6 @@ const createCharacterButton = createButton('Create Character');
 
 let autoLoadEnabled = false;
 let autoLoadInterval;
-
 let isDragging = false;
 let offset = { x: 0, y: 0 };
 let lastPosition = { x: 0, y: 0 };
@@ -50,6 +49,11 @@ let initialTouchDistance = 0;
 let initialScale = 1;
 
 const startDragging = (e) => {
+    // Allow scrolling if target is scrollable content
+    if (e.target.closest('.scrollable-content')) {
+        return;
+    }
+
     if (e.touches) {
         if (e.touches.length === 2) {
             initialTouchDistance = Math.hypot(
@@ -133,6 +137,11 @@ const stopDragging = () => {
 };
 
 const drag = (e) => {
+    // Allow scrolling if target is scrollable content
+    if (e.target.closest('.scrollable-content')) {
+        return;
+    }
+
     if (e.touches && e.touches.length === 2) {
         e.preventDefault();
         const currentDistance = Math.hypot(
@@ -181,16 +190,16 @@ const drag = (e) => {
     lastTime = currentTime;
 };
 
-floatingUI.style.touchAction = 'pan-x pan-y';
+floatingUI.style.touchAction = 'auto';
 
 floatingUI.addEventListener('mousedown', startDragging);
-floatingUI.addEventListener('touchstart', startDragging, { passive: false });
+floatingUI.addEventListener('touchstart', startDragging, { passive: true });
 
 document.addEventListener('mouseup', stopDragging);
 document.addEventListener('touchend', stopDragging);
 
 document.addEventListener('mousemove', drag);
-document.addEventListener('touchmove', drag, { passive: false });
+document.addEventListener('touchmove', drag, { passive: true });
 
 function saveFloatingUIPosition() {
     const position = {
