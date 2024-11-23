@@ -48,8 +48,9 @@ let lastTime = 0;
 const startDragging = (e) => {
     isDragging = true;
     const rect = floatingUI.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
     offset.x = clientX - rect.left;
     offset.y = clientY - rect.top;
     lastPosition.x = clientX;
@@ -57,7 +58,9 @@ const startDragging = (e) => {
     lastTime = Date.now();
     document.body.style.cursor = 'grabbing';
     floatingUI.style.transition = 'none';
-    e.preventDefault();
+    if (e.type.includes('touch')) {
+        e.preventDefault();
+    }
 };
 
 const stopDragging = () => {
@@ -76,8 +79,14 @@ const stopDragging = () => {
                     const currentLeft = parseFloat(floatingUI.style.left);
                     const currentTop = parseFloat(floatingUI.style.top);
                     
-                    floatingUI.style.left = `${currentLeft + Math.cos(angle) * currentVelocity}px`;
-                    floatingUI.style.top = `${currentTop + Math.sin(angle) * currentVelocity}px`;
+                    const maxX = window.innerWidth - floatingUI.offsetWidth;
+                    const maxY = window.innerHeight - floatingUI.offsetHeight;
+                    
+                    const newLeft = Math.min(Math.max(0, currentLeft + Math.cos(angle) * currentVelocity), maxX);
+                    const newTop = Math.min(Math.max(0, currentTop + Math.sin(angle) * currentVelocity), maxY);
+                    
+                    floatingUI.style.left = `${newLeft}px`;
+                    floatingUI.style.top = `${newTop}px`;
                     
                     currentVelocity *= decay;
                     requestAnimationFrame(animate);
@@ -94,8 +103,8 @@ const stopDragging = () => {
 
 const drag = (e) => {
     if (isDragging) {
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
         
         const now = Date.now();
         const dt = now - lastTime;
@@ -108,24 +117,41 @@ const drag = (e) => {
         lastPosition.y = clientY;
         lastTime = now;
 
-        const newLeft = clientX - offset.x;
-        const newTop = clientY - offset.y;
+        let newLeft = clientX - offset.x;
+        let newTop = clientY - offset.y;
+
+        const maxX = window.innerWidth - floatingUI.offsetWidth;
+        const maxY = window.innerHeight - floatingUI.offsetHeight;
+        
+        newLeft = Math.min(Math.max(0, newLeft), maxX);
+        newTop = Math.min(Math.max(0, newTop), maxY);
         
         floatingUI.style.left = `${newLeft}px`;
         floatingUI.style.top = `${newTop}px`;
         
-        e.preventDefault();
+        if (e.type.includes('touch')) {
+            e.preventDefault();
+        }
     }
 };
 
-floatingUI.addEventListener('mousedown', startDragging, { passive: false });
+floatingUI.addEventListener('mousedown', startDragging);
 floatingUI.addEventListener('touchstart', startDragging, { passive: false });
 
 document.addEventListener('mouseup', stopDragging);
 document.addEventListener('touchend', stopDragging);
 
-document.addEventListener('mousemove', drag, { passive: false });
+document.addEventListener('mousemove', drag);
 document.addEventListener('touchmove', drag, { passive: false });
+
+window.addEventListener('resize', () => {
+    const rect = floatingUI.getBoundingClientRect();
+    const maxX = window.innerWidth - floatingUI.offsetWidth;
+    const maxY = window.innerHeight - floatingUI.offsetHeight;
+    
+    floatingUI.style.left = `${Math.min(rect.left, maxX)}px`;
+    floatingUI.style.top = `${Math.min(rect.top, maxY)}px`;
+});
 
 function saveFloatingUIPosition() {
     const floatingUI = document.querySelector('.floating-ui');
@@ -203,10 +229,10 @@ const toggleExpand = (expand) => {
 
 const minimizeButton = createButton('−', '#F44336');
 if (window.innerWidth <= 768) {
-    minimizeButton.style.width = '30px';
-    minimizeButton.style.height = '30px';
-    minimizeButton.style.fontSize = '16px';
-    minimizeButton.style.padding = '2px';
+    minimizeButton.style.width = '40px';
+    minimizeButton.style.height = '40px';
+    minimizeButton.style.fontSize = '20px';
+    minimizeButton.style.padding = '4px';
 }
 minimizeButton.onclick = () => {
     const isExpanded = floatingUI.dataset.expanded === 'true';
@@ -1270,6 +1296,7 @@ Page {
 const animationCustomizerButton = createAnimationCustomizer();
 floatingUI.appendChild(animationCustomizerButton);
 
+
 floatingUI.appendChild(promptLibraryButton);
 floatingUI.appendChild(autoLoadButton);
 floatingUI.appendChild(promptButton);
@@ -1646,3 +1673,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach(() => {
+        const descriptionElement = document.querySelector('p[id$="-form-item-description"]');
+        if (descriptionElement && descriptionElement.textContent.includes('These instructions will affect')) {
+            descriptionElement.remove();
+        }
+    });
+});
+
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});
