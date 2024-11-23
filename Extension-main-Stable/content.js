@@ -1486,65 +1486,6 @@ async function tokenizeText(text) {
     return JSON.stringify(data, null, 2);
 }
 
-function adjustGuiForSmallScreens() {
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
-    function handleScreenChange(e) {
-        if (e.matches) {
-            document.documentElement.style.fontSize = '12px';
-            document.documentElement.style.padding = '5px';
-            
-            const floatingUI = document.querySelector('.floating-ui');
-            if (floatingUI) {
-                floatingUI.style.transform = 'scale(0.8)';
-                floatingUI.style.right = '10px';
-                floatingUI.style.bottom = '10px';
-                
-                const buttons = floatingUI.querySelectorAll('button');
-                buttons.forEach(button => {
-                    button.style.padding = '6px 10px';
-                    button.style.fontSize = '11px';
-                    button.style.margin = '3px';
-                });
-
-                const minimizeBtn = floatingUI.querySelector('minimizeButton');
-                if (minimizeBtn) {
-                    minimizeBtn.style.padding = '4px 8px';
-                    minimizeBtn.style.fontSize = '10px';
-                    minimizeBtn.style.minWidth = '20px';
-                }
-            }
-            
-        } else {
-            document.documentElement.style.fontSize = '16px';
-            document.documentElement.style.padding = '10px';
-            
-            const floatingUI = document.querySelector('.floating-ui');
-            if (floatingUI) {
-                floatingUI.style.transform = 'scale(1)';
-                floatingUI.style.right = '20px';
-                floatingUI.style.bottom = '20px';
-                
-                const buttons = floatingUI.querySelectorAll('button');
-                buttons.forEach(button => {
-                    button.style.padding = '8px 12px';
-                    button.style.fontSize = '14px';
-                    button.style.margin = '5px';
-                });
-
-                const minimizeBtn = floatingUI.querySelector('minimizeButton');
-                if (minimizeBtn) {
-                    minimizeBtn.style.padding = '6px 10px';
-                    minimizeBtn.style.fontSize = '12px';
-                    minimizeBtn.style.minWidth = '24px';
-                }
-            }
-        }
-    }
-    mediaQuery.addListener(handleScreenChange);
-    handleScreenChange(mediaQuery);
-}
-
-adjustGuiForSmallScreens();
 
 // document.querySelectorAll('textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"]').forEach(textarea => {
 //     textarea.addEventListener('input', async (event) => {
