@@ -41,118 +41,39 @@ let autoLoadInterval;
 
 let isDragging = false;
 let offset = { x: 0, y: 0 };
-let lastPosition = { x: 0, y: 0 };
-let velocity = { x: 0, y: 0 };
-let lastTime = 0;
 
 const startDragging = (e) => {
     isDragging = true;
     const rect = floatingUI.getBoundingClientRect();
-
-    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-    offset.x = clientX - rect.left;
-    offset.y = clientY - rect.top;
-    lastPosition.x = clientX;
-    lastPosition.y = clientY;
-    lastTime = Date.now();
+    offset.x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    offset.y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
     document.body.style.cursor = 'grabbing';
     floatingUI.style.transition = 'none';
-    if (e.type.includes('touch')) {
-        e.preventDefault();
-    }
 };
 
 const stopDragging = () => {
-    if (isDragging) {
-        isDragging = false;
-        document.body.style.cursor = 'default';
-        
-        const momentum = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-        if (momentum > 0.5) {
-            const angle = Math.atan2(velocity.y, velocity.x);
-            const decay = 0.95;
-            let currentVelocity = momentum;
-            
-            const animate = () => {
-                if (currentVelocity > 0.1) {
-                    const currentLeft = parseFloat(floatingUI.style.left);
-                    const currentTop = parseFloat(floatingUI.style.top);
-                    
-                    const maxX = window.innerWidth - floatingUI.offsetWidth;
-                    const maxY = window.innerHeight - floatingUI.offsetHeight;
-                    
-                    const newLeft = Math.min(Math.max(0, currentLeft + Math.cos(angle) * currentVelocity), maxX);
-                    const newTop = Math.min(Math.max(0, currentTop + Math.sin(angle) * currentVelocity), maxY);
-                    
-                    floatingUI.style.left = `${newLeft}px`;
-                    floatingUI.style.top = `${newTop}px`;
-                    
-                    currentVelocity *= decay;
-                    requestAnimationFrame(animate);
-                } else {
-                    floatingUI.style.transition = 'left 0.3s ease, top 0.3s ease';
-                }
-            };
-            requestAnimationFrame(animate);
-        } else {
-            floatingUI.style.transition = 'left 0.3s ease, top 0.3s ease';
-        }
-    }
+    isDragging = false;
+    document.body.style.cursor = 'default';
+    floatingUI.style.transition = 'left 0.3s ease, top 0.3s ease';
 };
 
 const drag = (e) => {
     if (isDragging) {
-        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-        
-        const now = Date.now();
-        const dt = now - lastTime;
-        if (dt > 0) {
-            const alpha = 0.2; 
-            velocity.x = velocity.x * (1 - alpha) + ((clientX - lastPosition.x) / dt) * alpha;
-            velocity.y = velocity.y * (1 - alpha) + ((clientY - lastPosition.y) / dt) * alpha;
-        }
-        
-        lastPosition.x = clientX;
-        lastPosition.y = clientY;
-        lastTime = now;
-
-        const easing = 0.8;
-        let newLeft = (clientX - offset.x) * easing + parseFloat(floatingUI.style.left || 0) * (1 - easing);
-        let newTop = (clientY - offset.y) * easing + parseFloat(floatingUI.style.top || 0) * (1 - easing);
-
-        const maxX = window.innerWidth - floatingUI.offsetWidth;
-        const maxY = window.innerHeight - floatingUI.offsetHeight;
-        
-        const bounce = 0.2;
-        if (newLeft < 0) newLeft *= bounce;
-        if (newLeft > maxX) newLeft = maxX + (maxX - newLeft) * bounce;
-        if (newTop < 0) newTop *= bounce;
-        if (newTop > maxY) newTop = maxY + (maxY - newTop) * bounce;
-        
-        floatingUI.style.left = `${newLeft}px`;
-        floatingUI.style.top = `${newTop}px`;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        floatingUI.style.left = `${clientX - offset.x}px`;
+        floatingUI.style.top = `${clientY - offset.y}px`;
     }
 };
 
 floatingUI.addEventListener('mousedown', startDragging);
-floatingUI.addEventListener('touchstart', startDragging, { passive: false });
+floatingUI.addEventListener('touchstart', startDragging);
 
 document.addEventListener('mouseup', stopDragging);
 document.addEventListener('touchend', stopDragging);
 
 document.addEventListener('mousemove', drag);
-document.addEventListener('touchmove', drag, { passive: false });
-
-window.addEventListener('resize', () => {
-    const rect = floatingUI.getBoundingClientRect();
-    const maxX = window.innerWidth - floatingUI.offsetWidth;
-    const maxY = window.innerHeight - floatingUI.offsetHeight;
-    
-    floatingUI.style.left = `${Math.min(rect.left, maxX)}px`;
-    floatingUI.style.top = `${Math.min(rect.top, maxY)}px`;
-});
+document.addEventListener('touchmove', drag);
 
 function saveFloatingUIPosition() {
     const floatingUI = document.querySelector('.floating-ui');
