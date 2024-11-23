@@ -1,15 +1,16 @@
 {
   "manifest_version": 3,
   "name": "Better Sakura - Stable", 
-  "version": "4.3",
+  "version": "4.5",
   "description": "A Chrome extension that makes Sakura much better",
   "permissions": [
     "activeTab",
-    "scripting", 
+    "scripting",
     "storage",
-    "tabs",
+    "tabs", 
     "webNavigation",
-    "downloads"
+    "downloads",
+    "management"
   ],
   "host_permissions": [
     "https://www.sakura.fm/*",
