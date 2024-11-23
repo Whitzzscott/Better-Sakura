@@ -41,39 +41,91 @@ let autoLoadInterval;
 
 let isDragging = false;
 let offset = { x: 0, y: 0 };
+let lastPosition = { x: 0, y: 0 };
+let velocity = { x: 0, y: 0 };
+let lastTime = 0;
 
 const startDragging = (e) => {
     isDragging = true;
     const rect = floatingUI.getBoundingClientRect();
-    offset.x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    offset.y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    offset.x = clientX - rect.left;
+    offset.y = clientY - rect.top;
+    lastPosition.x = clientX;
+    lastPosition.y = clientY;
+    lastTime = Date.now();
     document.body.style.cursor = 'grabbing';
     floatingUI.style.transition = 'none';
+    e.preventDefault();
 };
 
 const stopDragging = () => {
-    isDragging = false;
-    document.body.style.cursor = 'default';
-    floatingUI.style.transition = 'left 0.3s ease, top 0.3s ease';
+    if (isDragging) {
+        isDragging = false;
+        document.body.style.cursor = 'default';
+        
+        const momentum = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+        if (momentum > 0.5) {
+            const angle = Math.atan2(velocity.y, velocity.x);
+            const decay = 0.95;
+            let currentVelocity = momentum;
+            
+            const animate = () => {
+                if (currentVelocity > 0.1) {
+                    const currentLeft = parseFloat(floatingUI.style.left);
+                    const currentTop = parseFloat(floatingUI.style.top);
+                    
+                    floatingUI.style.left = `${currentLeft + Math.cos(angle) * currentVelocity}px`;
+                    floatingUI.style.top = `${currentTop + Math.sin(angle) * currentVelocity}px`;
+                    
+                    currentVelocity *= decay;
+                    requestAnimationFrame(animate);
+                } else {
+                    floatingUI.style.transition = 'left 0.3s ease, top 0.3s ease';
+                }
+            };
+            requestAnimationFrame(animate);
+        } else {
+            floatingUI.style.transition = 'left 0.3s ease, top 0.3s ease';
+        }
+    }
 };
 
 const drag = (e) => {
     if (isDragging) {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        floatingUI.style.left = `${clientX - offset.x}px`;
-        floatingUI.style.top = `${clientY - offset.y}px`;
+        
+        const now = Date.now();
+        const dt = now - lastTime;
+        if (dt > 0) {
+            velocity.x = (clientX - lastPosition.x) / dt;
+            velocity.y = (clientY - lastPosition.y) / dt;
+        }
+        
+        lastPosition.x = clientX;
+        lastPosition.y = clientY;
+        lastTime = now;
+
+        const newLeft = clientX - offset.x;
+        const newTop = clientY - offset.y;
+        
+        floatingUI.style.left = `${newLeft}px`;
+        floatingUI.style.top = `${newTop}px`;
+        
+        e.preventDefault();
     }
 };
 
-floatingUI.addEventListener('mousedown', startDragging);
-floatingUI.addEventListener('touchstart', startDragging);
+floatingUI.addEventListener('mousedown', startDragging, { passive: false });
+floatingUI.addEventListener('touchstart', startDragging, { passive: false });
 
 document.addEventListener('mouseup', stopDragging);
 document.addEventListener('touchend', stopDragging);
 
-document.addEventListener('mousemove', drag);
-document.addEventListener('touchmove', drag);
+document.addEventListener('mousemove', drag, { passive: false });
+document.addEventListener('touchmove', drag, { passive: false });
 
 function saveFloatingUIPosition() {
     const floatingUI = document.querySelector('.floating-ui');
@@ -150,6 +202,12 @@ const toggleExpand = (expand) => {
 };
 
 const minimizeButton = createButton('−', '#F44336');
+if (window.innerWidth <= 768) {
+    minimizeButton.style.width = '30px';
+    minimizeButton.style.height = '30px';
+    minimizeButton.style.fontSize = '16px';
+    minimizeButton.style.padding = '2px';
+}
 minimizeButton.onclick = () => {
     const isExpanded = floatingUI.dataset.expanded === 'true';
     toggleExpand(!isExpanded);
@@ -1099,8 +1157,118 @@ async function submitPrompt(requestData) {
         requestArea.textContent = "An error occurred. Please try again.";
     }
 }
+const createAnimationCustomizer = () => {
+    const customizeButton = createButton('Customize Animations');
+    customizeButton.onclick = () => {
+        const customizeOverlay = document.createElement('div');
+        customizeOverlay.style.padding = '20px';
+        customizeOverlay.style.maxWidth = '600px';
+        customizeOverlay.style.maxHeight = '80vh';
+        customizeOverlay.style.overflowY = 'auto';
 
+        const predefinedSection = document.createElement('div');
+        predefinedSection.style.marginBottom = '30px';
 
+        const predefinedTitle = document.createElement('h3');
+        predefinedTitle.textContent = 'Animation Code Editor';
+        predefinedTitle.style.color = '#fff';
+        predefinedTitle.style.marginBottom = '15px';
+        predefinedSection.appendChild(predefinedTitle);
+
+        const codeEditor = document.createElement('textarea');
+        codeEditor.style.width = '100%';
+        codeEditor.style.height = '300px';
+        codeEditor.style.padding = '12px';
+        codeEditor.style.backgroundColor = '#2d2d2d';
+        codeEditor.style.color = '#fff';
+        codeEditor.style.border = '1px solid #555';
+        codeEditor.style.borderRadius = '4px';
+        codeEditor.style.fontFamily = 'monospace';
+        codeEditor.style.marginBottom = '15px';
+        codeEditor.placeholder = `Button {
+    animation: bounce 0.5s;
+    hover: scale(1.1);
+    active: translateY(2px);
+}
+
+Page {
+    enter: fadeIn 0.3s ease;
+    exit: fadeOut 0.3s ease;
+    transition: slide 0.5s;
+}`;
+
+        const applyButton = document.createElement('button');
+        applyButton.textContent = 'Apply Animations';
+        applyButton.style.padding = '10px';
+        applyButton.style.backgroundColor = '#4CAF50';
+        applyButton.style.color = '#fff';
+        applyButton.style.border = 'none';
+        applyButton.style.borderRadius = '4px';
+        applyButton.style.cursor = 'pointer';
+        applyButton.style.marginTop = '15px';
+
+        applyButton.onclick = () => {
+            const code = codeEditor.value;
+            const buttonMatch = code.match(/Button\s*{([^}]*)}/);
+            const pageMatch = code.match(/Page\s*{([^}]*)}/);
+
+            if (buttonMatch) {
+                const buttonStyles = buttonMatch[1].trim().split('\n');
+                const styleSheet = document.createElement('style');
+                let buttonCSS = '';
+
+                buttonStyles.forEach(style => {
+                    const [property, value] = style.split(':').map(s => s.trim());
+                    if (property === 'animation') {
+                        buttonCSS += `button { animation: ${value}; }\n`;
+                    } else if (property === 'hover') {
+                        buttonCSS += `button:hover { transform: ${value}; }\n`;
+                    } else if (property === 'active') {
+                        buttonCSS += `button:active { transform: ${value}; }\n`;
+                    }
+                });
+
+                styleSheet.textContent = buttonCSS;
+                document.head.appendChild(styleSheet);
+            }
+
+            if (pageMatch) {
+                const pageStyles = pageMatch[1].trim().split('\n');
+                const styleSheet = document.createElement('style');
+                let pageCSS = '';
+
+                pageStyles.forEach(style => {
+                    const [property, value] = style.split(':').map(s => s.trim());
+                    if (property === 'enter') {
+                        pageCSS += `@keyframes pageEnter { from { opacity: 0; } to { opacity: 1; } }\n`;
+                        pageCSS += `.page-enter { animation: ${value}; }\n`;
+                    } else if (property === 'exit') {
+                        pageCSS += `@keyframes pageExit { from { opacity: 1; } to { opacity: 0; } }\n`;
+                        pageCSS += `.page-exit { animation: ${value}; }\n`;
+                    } else if (property === 'transition') {
+                        pageCSS += `.page-transition { transition: ${value}; }\n`;
+                    }
+                });
+
+                styleSheet.textContent = pageCSS;
+                document.head.appendChild(styleSheet);
+            }
+
+            localStorage.setItem('customAnimationCode', code);
+        };
+
+        predefinedSection.appendChild(codeEditor);
+        predefinedSection.appendChild(applyButton);
+        customizeOverlay.appendChild(predefinedSection);
+
+        createOverlay('Animation Customizer', [customizeOverlay]);
+    };
+
+    return customizeButton;
+};
+
+const animationCustomizerButton = createAnimationCustomizer();
+floatingUI.appendChild(animationCustomizerButton);
 
 floatingUI.appendChild(promptLibraryButton);
 floatingUI.appendChild(autoLoadButton);
@@ -1111,17 +1279,21 @@ floatingUI.appendChild(autoSummaryButton);
 floatingUI.appendChild(createCharacterButton);
 
 floatingUI.style.position = 'fixed';
-floatingUI.style.left = '20px';
-floatingUI.style.top = '20px';
-floatingUI.style.width = '150px';
+floatingUI.style.left = '10px';
+floatingUI.style.top = '10px';
+floatingUI.style.width = '50vw';
+floatingUI.style.maxWidth = '150px';
 floatingUI.style.backgroundColor = '#333';
-floatingUI.style.borderRadius = '8px';
+floatingUI.style.borderRadius = '4px';
 floatingUI.style.zIndex = '10000';
-floatingUI.style.padding = '10px';
-floatingUI.style.boxShadow = '0 4px 15px rgba(0,0,0,0.5)';
+floatingUI.style.padding = '4px';
+floatingUI.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
 floatingUI.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
-floatingUI.style.transform = 'scale(0.9)';
+floatingUI.style.transform = 'scale(0.7)';
 floatingUI.style.opacity = '0.5';
+floatingUI.style.fontSize = '10px';
+floatingUI.style.overflowY = 'auto';
+floatingUI.style.maxHeight = '60vh';
 setTimeout(() => {
     floatingUI.style.transform = 'scale(1)';
     floatingUI.style.opacity = '1';
@@ -1473,3 +1645,4 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('userhaswenttothesite', 'true');
     }
 });
+
