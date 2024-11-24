@@ -209,7 +209,11 @@ function saveFloatingUIPosition() {
         top: floatingUI.style.top || '0px',
         left: floatingUI.style.left || '0px'
     };
-    chrome.storage.sync.set({ floatingUIPosition: position });
+    try {
+        chrome.storage?.sync?.set({ floatingUIPosition: position });
+    } catch (error) {
+        console.error('Failed to save floating UI position:', error);
+    }
 }
 
 function restoreFloatingUIPosition() {
@@ -1389,6 +1393,422 @@ disableUnnecessaryStuffButton.onclick = () => {
 };
 overlayContent.appendChild(disableUnnecessaryStuffButton);
 
+const funStuffHeader = document.createElement('h1');
+funStuffHeader.textContent = '<=====FUN STUFF=====>';
+funStuffHeader.style.textAlign = 'center';
+funStuffHeader.style.color = '#fff';
+funStuffHeader.style.marginTop = '20px';
+funStuffHeader.style.animation = 'fadeIn 1s ease-in-out';
+funStuffHeader.style.fontSize = '24px';
+funStuffHeader.style.textShadow = '2px 2px 4px rgba(0, 0, 0, 0.5)';
+funStuffHeader.style.userSelect = 'none';
+funStuffHeader.style.transition = 'transform 0.3s ease, color 0.3s ease';
+funStuffHeader.onmouseover = () => {
+    funStuffHeader.style.transform = 'scale(1.05)';
+    funStuffHeader.style.color = '#ffcc00';
+};
+funStuffHeader.onmouseout = () => {
+    funStuffHeader.style.transform = 'scale(1)';
+    funStuffHeader.style.color = '#fff';
+};
+overlayContent.appendChild(funStuffHeader);
+
+const chatButton = document.createElement('button');
+chatButton.textContent = '💬 Open Chat';
+chatButton.style.marginTop = '10px';
+chatButton.style.backgroundColor = '#4CAF50';
+chatButton.style.color = 'white';
+chatButton.style.border = 'none';
+chatButton.style.borderRadius = '10px';
+chatButton.style.padding = '15px 25px';
+chatButton.style.cursor = 'pointer';
+chatButton.style.fontSize = '16px';
+chatButton.style.fontFamily = "'Poppins', sans-serif";
+chatButton.style.fontWeight = '600';
+chatButton.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+chatButton.style.boxShadow = '0 4px 15px rgba(76, 175, 80, 0.3)';
+chatButton.style.transform = 'translateY(0)';
+chatButton.onmouseover = () => {
+    chatButton.style.transform = 'translateY(-3px)';
+    chatButton.style.boxShadow = '0 8px 20px rgba(76, 175, 80, 0.4)';
+    chatButton.style.backgroundColor = '#45a049';
+};
+chatButton.onmouseout = () => {
+    chatButton.style.transform = 'translateY(0)';
+    chatButton.style.boxShadow = '0 4px 15px rgba(76, 175, 80, 0.3)';
+    chatButton.style.backgroundColor = '#4CAF50';
+};
+
+let chatOverlay = null;
+
+chatButton.onclick = () => {
+    if (chatOverlay) {
+        return;
+    }
+
+    chatOverlay = document.createElement('div');
+    chatOverlay.style.position = 'fixed';
+    chatOverlay.style.top = '0';
+    chatOverlay.style.left = '0';
+    chatOverlay.style.width = '100%';
+    chatOverlay.style.height = '100%';
+    chatOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+    chatOverlay.style.display = 'flex';
+    chatOverlay.style.justifyContent = 'center';
+    chatOverlay.style.alignItems = 'center';
+    chatOverlay.style.zIndex = '999999999';
+    chatOverlay.style.animation = 'fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+    chatOverlay.style.backdropFilter = 'blur(8px)';
+
+    const chatBox = document.createElement('div');
+    chatBox.style.backgroundColor = '#1a2634';
+    chatBox.style.color = '#fff';
+    chatBox.style.padding = '30px';
+    chatBox.style.borderRadius = '20px';
+    chatBox.style.boxShadow = '0 10px 30px rgba(0,0,0,0.8)';
+    chatBox.style.position = 'relative';
+    chatBox.style.width = '450px';
+    chatBox.style.animation = 'slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+    chatBox.style.border = '1px solid rgba(255,255,255,0.1)';
+
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '&times;';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '15px';
+    closeButton.style.right = '15px';
+    closeButton.style.backgroundColor = '#ff4757';
+    closeButton.style.color = 'white';
+    closeButton.style.border = 'none';
+    closeButton.style.borderRadius = '50%';
+    closeButton.style.width = '35px';
+    closeButton.style.height = '35px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.fontSize = '24px';
+    closeButton.style.display = 'flex';
+    closeButton.style.justifyContent = 'center';
+    closeButton.style.alignItems = 'center';
+    closeButton.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    closeButton.style.transform = 'rotate(0deg)';
+    closeButton.onmouseover = () => {
+        closeButton.style.backgroundColor = '#ff6b81';
+        closeButton.style.transform = 'rotate(90deg)';
+    };
+    closeButton.onmouseout = () => {
+        closeButton.style.backgroundColor = '#ff4757';
+        closeButton.style.transform = 'rotate(0deg)';
+    };
+    closeButton.onclick = () => {
+        chatOverlay.style.animation = 'fadeOut 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        chatBox.style.animation = 'slideOutDown 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => {
+            document.body.removeChild(chatOverlay);
+            chatOverlay = null;
+        }, 400);
+    };
+
+    const userNameInput = document.createElement('input');
+    userNameInput.placeholder = '👤 Enter your name';
+    userNameInput.style.width = '100%';
+    userNameInput.style.padding = '15px';
+    userNameInput.style.marginBottom = '20px';
+    userNameInput.style.borderRadius = '12px';
+    userNameInput.style.border = '2px solid #2d3f50';
+    userNameInput.style.backgroundColor = '#2d3f50';
+    userNameInput.style.color = '#fff';
+    userNameInput.style.fontSize = '15px';
+    userNameInput.style.fontFamily = "'Poppins', sans-serif";
+    userNameInput.style.transition = 'all 0.3s ease';
+    userNameInput.style.outline = 'none';
+    userNameInput.onfocus = () => userNameInput.style.border = '2px solid #3498db';
+    userNameInput.onblur = () => userNameInput.style.border = '2px solid #2d3f50';
+
+    const messagesDiv = document.createElement('div');
+    messagesDiv.style.maxHeight = '350px';
+    messagesDiv.style.overflowY = 'auto';
+    messagesDiv.style.marginBottom = '20px';
+    messagesDiv.style.padding = '15px';
+    messagesDiv.style.backgroundColor = '#2d3f50';
+    messagesDiv.style.borderRadius = '12px';
+    messagesDiv.style.scrollBehavior = 'smooth';
+
+    const userMessageInput = document.createElement('input');
+    userMessageInput.placeholder = '✍️ Type your message';
+    userMessageInput.style.width = '100%';
+    userMessageInput.style.padding = '15px';
+    userMessageInput.style.marginBottom = '20px';
+    userMessageInput.style.borderRadius = '12px';
+    userMessageInput.style.border = '2px solid #2d3f50';
+    userMessageInput.style.backgroundColor = '#2d3f50';
+    userMessageInput.style.color = '#fff';
+    userMessageInput.style.fontSize = '15px';
+    userMessageInput.style.fontFamily = "'Poppins', sans-serif";
+    userMessageInput.style.transition = 'all 0.3s ease';
+    userMessageInput.style.outline = 'none';
+    userMessageInput.onfocus = () => userMessageInput.style.border = '2px solid #3498db';
+    userMessageInput.onblur = () => userMessageInput.style.border = '2px solid #2d3f50';
+
+    const sendButton = document.createElement('button');
+    sendButton.innerHTML = '📤 Send Message';
+    sendButton.style.backgroundColor = '#3498db';
+    sendButton.style.color = 'white';
+    sendButton.style.border = 'none';
+    sendButton.style.borderRadius = '12px';
+    sendButton.style.padding = '15px 25px';
+    sendButton.style.cursor = 'pointer';
+    sendButton.style.width = '100%';
+    sendButton.style.fontSize = '15px';
+    sendButton.style.fontFamily = "'Poppins', sans-serif";
+    sendButton.style.fontWeight = '600';
+    sendButton.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    sendButton.style.transform = 'translateY(0)';
+    sendButton.onmouseover = () => {
+        sendButton.style.backgroundColor = '#2980b9';
+        sendButton.style.transform = 'translateY(-2px)';
+    };
+    sendButton.onmouseout = () => {
+        sendButton.style.backgroundColor = '#3498db';
+        sendButton.style.transform = 'translateY(0)';
+    };
+
+    chatBox.appendChild(closeButton);
+    chatBox.appendChild(userNameInput);
+    chatBox.appendChild(messagesDiv);
+    chatBox.appendChild(userMessageInput);
+    chatBox.appendChild(sendButton);
+    chatOverlay.appendChild(chatBox);
+    document.body.appendChild(chatOverlay);
+
+    const SERVER_URL = 'https://chat-8c4o.onrender.com/chat';
+
+    fetchMessages();
+
+    const handleSendMessage = () => {
+        const message = userMessageInput.value.trim();
+        const user = userNameInput.value.trim() || 'User';
+        if (message) {
+            sendMessage(user, message);
+            userMessageInput.value = '';
+        }
+    };
+
+    sendButton.addEventListener('click', handleSendMessage);
+
+    userMessageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleSendMessage();
+        }
+    });
+
+    function fetchMessages() {
+        fetch(SERVER_URL, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'CHAT1234'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            messagesDiv.innerHTML = '';
+            data.messages.forEach(msg => {
+                displayMessage(msg);
+            });
+        })
+        .catch(error => console.error('Error fetching messages:', error));
+    }
+
+    function displayMessage(message) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.textContent = `${message.user}: ${message.message}`;
+        messagesDiv.appendChild(messageElement);
+    }
+
+    function sendMessage(user, message) {
+        const messageData = {
+            user: user,
+            message: message
+        };
+
+        fetch(SERVER_URL, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'CHAT1234',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(messageData)
+        })
+        .then(response => {
+            if (response.ok) {
+                fetchMessages();
+            } else {
+                console.error('Error sending message');
+            }
+        })
+        .catch(error => console.error('Error sending message:', error));
+    }
+};
+overlayContent.appendChild(chatButton);
+
+const randomFeatureButton = document.createElement('button');
+randomFeatureButton.textContent = 'Random Number';
+randomFeatureButton.style.marginTop = '10px';
+randomFeatureButton.style.backgroundColor = '#007BFF';
+randomFeatureButton.style.color = 'white';
+randomFeatureButton.style.border = 'none';
+randomFeatureButton.style.borderRadius = '5px';
+randomFeatureButton.style.padding = '12px 20px';
+randomFeatureButton.style.cursor = 'pointer';
+randomFeatureButton.style.fontSize = '14px';
+randomFeatureButton.style.fontWeight = '500';
+randomFeatureButton.style.transition = 'all 0.3s ease';
+randomFeatureButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+randomFeatureButton.onclick = () => {
+    const randomNumber = Math.floor(Math.random() * 100) + 1;
+    alert(`Random number generated: ${randomNumber}`);
+};
+
+overlayContent.appendChild(randomFeatureButton);
+
+let gameStarted = false;
+
+const playDinoGameButton = document.createElement('button');
+playDinoGameButton.textContent = '🦖 Play Dino Game';
+playDinoGameButton.style.marginTop = '10px';
+playDinoGameButton.style.backgroundColor = '#007BFF';
+playDinoGameButton.style.color = 'white';
+playDinoGameButton.style.border = 'none';
+playDinoGameButton.style.borderRadius = '5px';
+playDinoGameButton.style.padding = '12px 20px';
+playDinoGameButton.style.cursor = 'pointer';
+playDinoGameButton.style.fontSize = '14px';
+playDinoGameButton.style.fontWeight = '500';
+playDinoGameButton.style.transition = 'all 0.3s ease';
+playDinoGameButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+playDinoGameButton.onclick = () => {
+    if (gameStarted) return;
+    gameStarted = true;
+
+    const dinoGameContainer = document.createElement('div');
+    dinoGameContainer.style.position = 'relative';
+    dinoGameContainer.style.width = '100%';
+    dinoGameContainer.style.height = '200px';
+    dinoGameContainer.style.overflow = 'hidden';
+    dinoGameContainer.style.backgroundColor = '#f7f7f7';
+
+    const dino = document.createElement('div');
+    dino.style.position = 'absolute';
+    dino.style.bottom = '0';
+    dino.style.left = '50px';
+    dino.style.width = '40px';
+    dino.style.height = '40px';
+    dino.style.backgroundColor = 'green';
+
+    dinoGameContainer.appendChild(dino);
+    overlayContent.appendChild(dinoGameContainer);
+
+    let isJumping = false;
+    let level = 1;
+    let cactusSpeed = 2000;
+    let gameOverAlerted = false;
+
+    function jump() {
+        if (isJumping) return;
+        isJumping = true;
+        let jumpHeight = 0;
+        const jumpInterval = setInterval(() => {
+            if (jumpHeight >= 100) {
+                clearInterval(jumpInterval);
+                const fallInterval = setInterval(() => {
+                    if (jumpHeight <= 0) {
+                        clearInterval(fallInterval);
+                        isJumping = false;
+                    }
+                    jumpHeight -= 5;
+                    dino.style.bottom = `${jumpHeight}px`;
+                }, 20);
+            }
+            jumpHeight += 5;
+            dino.style.bottom = `${jumpHeight}px`;
+        }, 20);
+    }
+
+    document.addEventListener('keydown', (event) => {
+        if (event.code === 'Space') {
+            jump();
+        }
+    });
+
+    function spawnCactus() {
+        const cactus = document.createElement('div');
+        cactus.style.position = 'absolute';
+        cactus.style.bottom = '0';
+        cactus.style.right = '50px';
+        cactus.style.width = '20px';
+        cactus.style.height = '40px';
+        cactus.style.backgroundColor = 'brown';
+        dinoGameContainer.appendChild(cactus);
+
+        let cactusInterval = setInterval(() => {
+            const cactusPosition = parseInt(cactus.style.right);
+            if (cactusPosition < 0) {
+                clearInterval(cactusInterval);
+                cactus.remove();
+            } else {
+                cactus.style.right = `${cactusPosition + 5}px`;
+                if (collision(dino, cactus)) {
+                    if (!gameOverAlerted) {
+                        alert('Game Over!');
+                        gameOverAlerted = true;
+                    }
+                    clearInterval(cactusInterval);
+                    dinoGameContainer.remove();
+                }
+            }
+        }, 20);
+    }
+
+    function collision(dino, cactus) {
+        const dinoRect = dino.getBoundingClientRect();
+        const cactusRect = cactus.getBoundingClientRect();
+        return !(
+            dinoRect.top > cactusRect.bottom ||
+            dinoRect.bottom < cactusRect.top ||
+            dinoRect.right < cactusRect.left ||
+            dinoRect.left > cactusRect.right
+        );
+    }
+
+    const closeButton = document.createElement('button');
+    closeButton.textContent = '❌';
+    closeButton.style.position = 'absolute';
+    closeButton.style.top = '10px';
+    closeButton.style.right = '10px';
+    closeButton.style.backgroundColor = 'red';
+    closeButton.style.color = 'white';
+    closeButton.style.border = 'none';
+    closeButton.style.borderRadius = '5px';
+    closeButton.style.cursor = 'pointer';
+    closeButton.onclick = () => {
+        dinoGameContainer.remove();
+        gameStarted = false;
+        gameOverAlerted = false;
+    };
+
+    dinoGameContainer.appendChild(closeButton);
+    setInterval(() => {
+        spawnCactus();
+        level++;
+        cactusSpeed = Math.max(500, cactusSpeed - 200);
+    }, cactusSpeed);
+};
+overlayContent.appendChild(playDinoGameButton);
+
+
+
+
+
+
+
 
 };
 
@@ -1936,3 +2356,72 @@ setTimeout(() => {
         popup.remove();
     }, 500);
 }, 5000);
+
+
+const textarea = document.querySelectorAll('textarea[placeholder="Message"][class="w-full resize-none bg-transparent py-[1.375rem] text-base focus-within:outline-none disabled:opacity-80 flex-1"][style="height: 51px !important;"]');
+
+textarea.forEach(textarea => {
+    const updatePreview = () => {
+        const text = textarea.value;
+        console.log('Updating preview for:', text);
+        
+        let markdownText = text
+            .replace(/```([^`]*?)```/gs, '<pre><code>$1</code></pre>')
+            .replace(/!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">')
+            .replace(/(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg))/g, '<img src="$1" alt="Image" style="max-width: 100%; height: auto;">')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/~~(.*?)~~/g, '<del>$1</del>')
+            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+            .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+            .replace(/^- (.*$)/gm, '<li>$1</li>')
+            .replace(/^([0-9]+)\. (.*$)/gm, '<li>$2</li>')
+            .replace(/^---$/gm, '<hr>')
+            .replace(/\^\^(.*?)\^\^/g, '<sup>$1</sup>')
+            .replace(/~(.*?)~/g, '<sub>$1</sub>')
+            .replace(/\=\=(.*?)\=\=/g, '<mark>$1</mark>')
+            .replace(/^```(\w+)\n([\s\S]*?)```$/gm, '<pre><code class="language-$1">$2</code></pre>');
+
+        const base64Regex = /data:image\/[a-z]+;base64,[A-Za-z0-9+/=]+/g;
+        markdownText = markdownText.replace(base64Regex, match => 
+            `<img src="${match}" alt="Base64 Image" style="max-width: 100%; height: auto;">`
+        );
+
+        let previewDiv = textarea.nextElementSibling;
+        if (!previewDiv || !previewDiv.classList.contains('markdown-preview')) {
+            previewDiv = document.createElement('div');
+            previewDiv.classList.add('markdown-preview');
+            previewDiv.style.position = 'absolute';
+            previewDiv.style.top = '100%';
+            previewDiv.style.left = '0';
+            previewDiv.style.width = '100%';
+            previewDiv.style.backgroundColor = '#1a1a1a';
+            previewDiv.style.padding = '10px';
+            previewDiv.style.borderRadius = '5px';
+            previewDiv.style.zIndex = '1000';
+            previewDiv.style.color = '#fff';
+            textarea.parentNode.style.position = 'relative';
+            textarea.parentNode.appendChild(previewDiv);
+        }
+
+        previewDiv.innerHTML = markdownText;
+        previewDiv.style.display = 'block';
+        console.log('Preview updated:', markdownText);
+    };
+
+    const observer = new MutationObserver(updatePreview);
+
+    observer.observe(textarea, {
+        attributes: true,
+        characterData: true,
+        childList: true,
+        subtree: true
+    });
+
+    updatePreview();
+    textarea.addEventListener('input', updatePreview);
+});
