@@ -671,8 +671,7 @@ const makeTransparentButton = createButton('Make UI Transparent');
 makeTransparentButton.onclick = () => {
     floatingUI.style.backgroundColor = 'transparent';
     floatingUI.style.boxShadow = 'none';
-    floatingUI.style.width = '0';
-    floatingUI.style.height = '0';
+    floatingUI.style.width = '200px';
 };
 
 overlayContent.appendChild(makeTransparentButton);
