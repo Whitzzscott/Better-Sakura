@@ -1579,8 +1579,11 @@ chatButton.onclick = () => {
     document.body.appendChild(chatOverlay);
 
     const SERVER_URL = 'https://chat-8c4o.onrender.com/chat';
+    let lastMessageCount = 0;
+    let typingTimeout;
 
     fetchMessages();
+    setInterval(fetchMessages, 500);
 
     const handleSendMessage = () => {
         const message = userMessageInput.value.trim();
@@ -1588,6 +1591,7 @@ chatButton.onclick = () => {
         if (message) {
             sendMessage(user, message);
             userMessageInput.value = '';
+            removeTypingIndicator(user);
         }
     };
 
@@ -1596,8 +1600,47 @@ chatButton.onclick = () => {
     userMessageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             handleSendMessage();
+        } else {
+            const user = userNameInput.value.trim() || 'User';
+            if (userMessageInput.value.trim()) {
+                showTypingIndicator(user);
+            } else {
+                removeTypingIndicator(user);
+            }
         }
     });
+
+    userMessageInput.addEventListener('input', () => {
+        const user = userNameInput.value.trim() || 'User';
+        if (userMessageInput.value.trim()) {
+            showTypingIndicator(user);
+        } else {
+            removeTypingIndicator(user);
+        }
+    });
+
+    function showTypingIndicator(user) {
+        clearTimeout(typingTimeout);
+        const existingIndicator = document.querySelector(`[data-typing-user="${user}"]`);
+        if (!existingIndicator) {
+            const typingElement = document.createElement('div');
+            typingElement.classList.add('typing-indicator');
+            typingElement.setAttribute('data-typing-user', user);
+            typingElement.textContent = `${user} is typing...`;
+            typingElement.style.color = '#666';
+            typingElement.style.fontStyle = 'italic';
+            typingElement.style.padding = '5px';
+            messagesDiv.appendChild(typingElement);
+        }
+        typingTimeout = setTimeout(() => removeTypingIndicator(user), 2000);
+    }
+
+    function removeTypingIndicator(user) {
+        const indicator = document.querySelector(`[data-typing-user="${user}"]`);
+        if (indicator) {
+            indicator.remove();
+        }
+    }
 
     function fetchMessages() {
         fetch(SERVER_URL, {
@@ -1606,21 +1649,46 @@ chatButton.onclick = () => {
                 'Authorization': 'CHAT1234'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch');
+            }
+            return response.json();
+        })
         .then(data => {
-            messagesDiv.innerHTML = '';
-            data.messages.forEach(msg => {
-                displayMessage(msg);
-            });
+            if (data.messages.length !== lastMessageCount) {
+                lastMessageCount = data.messages.length;
+                updateMessages(data.messages);
+            }
         })
         .catch(error => console.error('Error fetching messages:', error));
     }
 
-    function displayMessage(message) {
+    function updateMessages(messages) {
+        const fragment = document.createDocumentFragment();
+        const existingMessages = messagesDiv.querySelectorAll('.message');
+        const existingIds = new Set(Array.from(existingMessages).map(el => el.dataset.messageId));
+
+        messages.forEach(msg => {
+            const messageId = `${msg.user}-${msg.message}`;
+            if (!existingIds.has(messageId)) {
+                const messageElement = createMessageElement(msg, messageId);
+                fragment.appendChild(messageElement);
+            }
+        });
+
+        if (fragment.children.length) {
+            messagesDiv.appendChild(fragment);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    }
+
+    function createMessageElement(message, messageId) {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
+        messageElement.dataset.messageId = messageId;
         messageElement.textContent = `${message.user}: ${message.message}`;
-        messagesDiv.appendChild(messageElement);
+        return messageElement;
     }
 
     function sendMessage(user, message) {
@@ -1638,11 +1706,10 @@ chatButton.onclick = () => {
             body: JSON.stringify(messageData)
         })
         .then(response => {
-            if (response.ok) {
-                fetchMessages();
-            } else {
-                console.error('Error sending message');
+            if (!response.ok) {
+                throw new Error('Failed to send message');
             }
+            fetchMessages();
         })
         .catch(error => console.error('Error sending message:', error));
     }
