@@ -671,6 +671,8 @@ const makeTransparentButton = createButton('Make UI Transparent');
 makeTransparentButton.onclick = () => {
     floatingUI.style.backgroundColor = 'transparent';
     floatingUI.style.boxShadow = 'none';
+    floatingUI.style.width = '0';
+    floatingUI.style.height = '0';
 };
 
 overlayContent.appendChild(makeTransparentButton);
@@ -944,13 +946,13 @@ const tokenizeButton = createButton('Manual Trigger Token Counter');
 tokenizeButton.onclick = async () => {
     const textareas = document.querySelectorAll('input[name^="exampleConversation"], textarea[name="description"], textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"], input[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"], textarea[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-1 rounded-l-none"][id=":R5dicvf6lefja:-form-item"][aria-describedby=":R5dicvf6lefja:-form-item-description"]');
 
-    textareas.forEach(async textarea => {
+    textareas.forEach(textarea => {
         let lastPTag = null;
         let overlayTags = [];
-        
+
         const processText = async () => {
             const text = textarea.value;
-            
+
             overlayTags.forEach(tag => tag.remove());
             overlayTags = [];
 
@@ -1020,7 +1022,7 @@ tokenizeButton.onclick = async () => {
             }
         };
 
-        await processText();
+        textarea.addEventListener('input', processText);
     });
 };
 
