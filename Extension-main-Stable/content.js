@@ -1339,6 +1339,57 @@ element { property: value; }
 
 const customCSSButton = createAnimationCustomizer();
 overlayContent.appendChild(customCSSButton);
+
+const disablePopupsButton = document.createElement('button');
+disablePopupsButton.textContent = 'Disable Popups';
+disablePopupsButton.style.marginTop = '10px';
+disablePopupsButton.style.marginBottom = '10px';
+disablePopupsButton.style.marginLeft = '10px';
+disablePopupsButton.style.marginRight = '10px';
+disablePopupsButton.style.backgroundColor = 'grey';
+disablePopupsButton.style.color = 'white';
+disablePopupsButton.style.border = 'none';
+disablePopupsButton.style.borderRadius = '5px';
+disablePopupsButton.style.padding = '12px 20px';
+disablePopupsButton.style.cursor = 'pointer';
+disablePopupsButton.style.fontSize = '14px';
+disablePopupsButton.style.fontWeight = '500';
+disablePopupsButton.style.transition = 'all 0.3s ease';
+disablePopupsButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+disablePopupsButton.onclick = () => {
+    popup.style.display = 'none';
+    alert('Popups have been disabled.');
+};
+overlayContent.appendChild(disablePopupsButton);
+
+const disableUnnecessaryStuffButton = document.createElement('button');
+disableUnnecessaryStuffButton.textContent = 'Disable Unnecessary Stuff';
+disableUnnecessaryStuffButton.style.marginTop = '10px';
+disableUnnecessaryStuffButton.style.marginBottom = '10px';
+disableUnnecessaryStuffButton.style.marginLeft = '10px';
+disableUnnecessaryStuffButton.style.marginRight = '10px';
+disableUnnecessaryStuffButton.style.backgroundColor = 'grey';
+disableUnnecessaryStuffButton.style.color = 'white';
+disableUnnecessaryStuffButton.style.border = 'none';
+disableUnnecessaryStuffButton.style.borderRadius = '5px';
+disableUnnecessaryStuffButton.style.padding = '12px 20px';
+disableUnnecessaryStuffButton.style.cursor = 'pointer';
+disableUnnecessaryStuffButton.style.fontSize = '14px';
+disableUnnecessaryStuffButton.style.fontWeight = '500';
+disableUnnecessaryStuffButton.style.transition = 'all 0.3s ease';
+disableUnnecessaryStuffButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+disableUnnecessaryStuffButton.onclick = () => {
+    const unnecessaryElement = document.querySelector('a[target="_blank"][data-ph-autocapture="true"]');
+    if (unnecessaryElement) {
+        unnecessaryElement.remove();
+        alert('Unnecessary stuff has been disabled.');
+    } else {
+        alert('No unnecessary stuff found to disable.');
+    }
+};
+overlayContent.appendChild(disableUnnecessaryStuffButton);
+
+
 };
 
 settingsButton.addEventListener('click', showSettingsOverlay);
@@ -1509,12 +1560,15 @@ floatingUI.style.borderRadius = '4px';
 floatingUI.style.zIndex = '10000';
 floatingUI.style.padding = '4px';
 floatingUI.style.boxShadow = '0 2px 6px rgba(0,0,0,0.4)';
-floatingUI.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
+floatingUI.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out, scrollbar-color 0.3s ease-in-out';
 floatingUI.style.transform = 'scale(0.7)';
 floatingUI.style.opacity = '0.5';
 floatingUI.style.fontSize = '10px';
 floatingUI.style.overflowY = 'auto';
 floatingUI.style.maxHeight = '60vh';
+floatingUI.style.scrollbarWidth = '2px';
+floatingUI.style.overflowY = 'scroll';
+floatingUI.style.scrollbarColor = '#888 #333';
 setTimeout(() => {
     floatingUI.style.transform = 'scale(1)';
     floatingUI.style.opacity = '1';
@@ -1531,7 +1585,9 @@ textareas.forEach(async textarea => {
     
     const processText = async () => {
         const text = textarea.value;
-        
+
+        if (!text) return;
+
         overlayTags.forEach(tag => tag.remove());
         overlayTags = [];
 
@@ -1602,22 +1658,20 @@ textareas.forEach(async textarea => {
     };
 
     const observer = new MutationObserver((mutations) => {
+        let newTextAdded = false;
         mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-                const pTag = textarea.parentNode.querySelector('p');
-                if (window.location.pathname.includes('/tokenize') || localStorage.getItem('showPTag') === 'true') {
-                    if (pTag) {
-                        pTag.style.opacity = '1';
-                        pTag.style.transform = 'translateY(0)';
-                    }
-                }
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                newTextAdded = true;
             }
         });
+        if (newTextAdded) {
+            processText();
+        }
     });
 
     observer.observe(textarea, {
-        attributes: true,
-        attributeFilter: ['value']
+        childList: true,
+        subtree: true
     });
 
     textarea.addEventListener('input', processText);
@@ -1813,60 +1867,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const hasVisited = localStorage.getItem('userhaswenttothesite');
-
-    if (!hasVisited) {
-        const popup = document.createElement('div');
-        popup.style.position = 'fixed';
-        popup.style.top = '50%';
-        popup.style.left = '50%';
-        popup.style.transform = 'translate(-50%, -50%)';
-        popup.style.backgroundColor = '#333';
-        popup.style.color = '#fff';
-        popup.style.padding = '20px';
-        popup.style.borderRadius = '8px';
-        popup.style.boxShadow = '0 4px 15px rgba(0,0,0,0.5)';
-        popup.style.zIndex = '10000';
-        popup.style.textAlign = 'center';
-        popup.style.animation = 'fadeIn 0.5s ease-in-out';
-
-        const message = document.createElement('p');
-        message.textContent = 'If the token counter doesn\'t load, go to Settings > Manual Trigger Token Counter';
-        popup.appendChild(message);
-
-        const closeButton = document.createElement('button');
-        closeButton.textContent = 'Close';
-        closeButton.style.marginTop = '10px';
-        closeButton.style.padding = '8px 12px';
-        closeButton.style.backgroundColor = '#444';
-        closeButton.style.border = '1px solid #555';
-        closeButton.style.borderRadius = '4px';
-        closeButton.style.color = '#fff';
-        closeButton.style.cursor = 'pointer';
-        closeButton.style.transition = 'all 0.3s ease';
-
-        closeButton.onmouseover = () => {
-            closeButton.style.backgroundColor = '#555';
-            closeButton.style.transform = 'scale(1.02)';
-        };
-
-        closeButton.onmouseout = () => {
-            closeButton.style.backgroundColor = '#444';
-            closeButton.style.transform = 'scale(1)';
-        };
-
-        closeButton.onclick = () => {
-            document.body.removeChild(popup);
-        };
-
-        popup.appendChild(closeButton);
-        document.body.appendChild(popup);
-
-        localStorage.setItem('userhaswenttothesite', 'true');
-    }
-});
-
 const observer = new MutationObserver((mutations) => {
     mutations.forEach(() => {
         const descriptionElement = document.querySelector('p[id$="-form-item-description"]');
@@ -1880,3 +1880,59 @@ observer.observe(document.body, {
     childList: true,
     subtree: true
 });
+
+
+const popups = [
+    'If the counter does not show please restart the site or if it keeps persisting to not show please go to settings and press manual Trigger Token counter',
+    'If you enjoy this extension, please give a reaction in the Discord post. If you found any bugs or have suggestions, feel free to report or suggest them in the Discord channel: <a href="https://discord.com/channels/1148016158923030558/1294598966209544262" style="color: #1e90ff; text-decoration: underline; cursor: pointer;">Discord Channel</a>'
+];
+
+const randomPopup = popups[Math.floor(Math.random() * popups.length)];
+const popup = document.createElement('div');
+popup.innerHTML = randomPopup;
+popup.style.position = 'fixed';
+popup.style.top = '50%';
+popup.style.left = '50%';
+popup.style.transform = 'translate(-50%, -50%)';
+popup.style.backgroundColor = '#444';
+popup.style.color = '#fff';
+popup.style.padding = '20px';
+popup.style.borderRadius = '10px';
+popup.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
+popup.style.zIndex = '1000';
+popup.style.opacity = '0';
+popup.style.transition = 'opacity 0.5s ease-in-out';
+popup.style.pointerEvents = 'none';
+popup.style.userSelect = 'none';
+
+const closeButton = document.createElement('button');
+closeButton.textContent = 'X';
+closeButton.style.position = 'absolute';
+closeButton.style.top = '10px';
+closeButton.style.right = '10px';
+closeButton.style.backgroundColor = 'transparent';
+closeButton.style.color = '#fff';
+closeButton.style.border = 'none';
+closeButton.style.cursor = 'pointer';
+closeButton.style.fontSize = '16px';
+closeButton.addEventListener('click', () => {
+    popup.style.opacity = '0';
+    setTimeout(() => {
+        popup.remove();
+    }, 500);
+});
+
+popup.appendChild(closeButton);
+document.body.appendChild(popup);
+
+requestAnimationFrame(() => {
+    popup.style.opacity = '1';
+    popup.style.pointerEvents = 'auto';
+});
+
+setTimeout(() => {
+    popup.style.opacity = '0';
+    setTimeout(() => {
+        popup.remove();
+    }, 500);
+}, 5000);
