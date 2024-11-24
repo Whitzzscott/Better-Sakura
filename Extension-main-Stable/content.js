@@ -1687,14 +1687,16 @@ chatButton.onclick = () => {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
         messageElement.dataset.messageId = messageId;
-        messageElement.textContent = `${message.user}: ${message.message}`;
+        const timestamp = new Date(message.timestamp).toLocaleTimeString();
+        messageElement.textContent = `${message.user} [${timestamp}]: ${message.message}`;
         return messageElement;
     }
 
     function sendMessage(user, message) {
         const messageData = {
             user: user,
-            message: message
+            message: message,
+            timestamp: Date.now()
         };
 
         fetch(SERVER_URL, {
