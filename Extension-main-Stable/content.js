@@ -603,7 +603,7 @@ const showPromptOverlay = () => {
     };
 
     const updateLoadMoreButton = (totalPrompts) => {
-        loadMoreButton.style.display = totalPrompts > 10 ? 'block' : 'none';
+        loadMoreButton.style.display = totalPrompts > currentPromptCount ? 'block' : 'none';
     };
 
     loadMoreButton.onclick = () => {
@@ -1026,6 +1026,10 @@ tokenizeButton.onclick = async () => {
         };
 
         textarea.addEventListener('input', processText);
+        if (!window.tokenCounterActive) {
+            alert("Token Counter is now active! Please add text to the input field to see the token count.");
+            window.tokenCounterActive = true;
+        }
     });
 };
 
@@ -1392,6 +1396,12 @@ disableUnnecessaryStuffButton.onclick = () => {
     }
 };
 overlayContent.appendChild(disableUnnecessaryStuffButton);
+
+const horizontalRule2 = document.createElement('hr');
+horizontalRule2.style.border = 'none';
+horizontalRule2.style.borderTop = '1px solid #ccc';
+horizontalRule2.style.margin = '20px 0';
+overlayContent.appendChild(horizontalRule2);
 
 const funStuffHeader = document.createElement('h1');
 funStuffHeader.textContent = '<=====FUN STUFF=====>';
@@ -1872,9 +1882,87 @@ playDinoGameButton.onclick = () => {
 };
 overlayContent.appendChild(playDinoGameButton);
 
+const horizontalRule = document.createElement('hr');
+horizontalRule.style.border = 'none';
+horizontalRule.style.borderTop = '1px solid #ccc';
+horizontalRule.style.margin = '20px 0';
+overlayContent.appendChild(horizontalRule);
+
+const versionHeader = document.createElement('div');
+versionHeader.style.display = 'flex';
+versionHeader.style.alignItems = 'center';
+versionHeader.style.justifyContent = 'center';
+versionHeader.style.backgroundColor = '#333';
+versionHeader.style.color = '#fff';
+versionHeader.style.padding = '10px';
+versionHeader.style.borderRadius = '5px';
+versionHeader.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.5)';
+versionHeader.style.animation = 'fadeIn 0.5s ease-in-out';
+versionHeader.style.userSelect = 'none';
+versionHeader.style.transition = 'transform 0.3s, background-color 0.3s';
+versionHeader.onmouseover = () => {
+    versionHeader.style.transform = 'scale(1.05)';
+    versionHeader.style.backgroundColor = '#444';
+};
+versionHeader.onmouseout = () => {
+    versionHeader.style.transform = 'scale(1)';
+    versionHeader.style.backgroundColor = '#333';
+};
 
 
+const versionText = document.createElement('h3');
+versionText.textContent = 'VERSION: ';
+versionText.style.margin = '0 10px';
 
+const fetchVersion = async () => {
+    try {
+        const response = await fetch('https://raw.githubusercontent.com/Whitzzscott/Better-Sakura/main/Extension-main-Stable/manifest.json');
+        if (!response.ok) throw new Error('Failed to fetch manifest');
+        const manifest = await response.json();
+        const version = manifest.version;
+        const versionDisplay = document.createElement('span');
+        versionDisplay.textContent = version;
+        versionDisplay.style.fontWeight = 'bold';
+        versionText.appendChild(versionDisplay);
+    } catch (error) {
+        console.error('Error fetching version:', error);
+    }
+};
+
+versionHeader.appendChild(versionText);
+overlayContent.appendChild(versionHeader);
+fetchVersion();
+
+
+const fetchExtensionId = () => {
+    return chrome.runtime.id || 'defaultExtensionId';
+};
+
+const displayUserId = () => {
+    let userId = fetchExtensionId();
+
+    const userIdDisplay = document.createElement('div');
+    userIdDisplay.textContent = `EXTENSION ID: ${userId}`;
+    userIdDisplay.style.textAlign = 'center';
+    userIdDisplay.style.color = '#fff';
+    userIdDisplay.style.marginTop = '20px';
+    userIdDisplay.style.backgroundColor = '#333';
+    userIdDisplay.style.borderRadius = '8px';
+    userIdDisplay.style.padding = '10px';
+    userIdDisplay.style.boxShadow = '0 2px 4px rgba(0,0,0,0.5)';
+    userIdDisplay.style.transition = 'transform 0.3s ease, color 0.3s ease';
+    userIdDisplay.onmouseover = () => {
+        userIdDisplay.style.transform = 'scale(1.05)';
+        userIdDisplay.style.backgroundColor = '#444';
+    };
+    userIdDisplay.onmouseout = () => {
+        userIdDisplay.style.transform = 'scale(1)';
+        userIdDisplay.style.backgroundColor = '#333';
+    };
+    overlayContent.appendChild(userIdDisplay);
+};
+
+displayUserId();
 
 
 
