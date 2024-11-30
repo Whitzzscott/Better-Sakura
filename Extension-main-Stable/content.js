@@ -1397,6 +1397,126 @@ disableUnnecessaryStuffButton.onclick = () => {
 };
 overlayContent.appendChild(disableUnnecessaryStuffButton);
 
+const autoGrammarButton = document.createElement('button');
+autoGrammarButton.textContent = 'Auto Grammar Check';
+autoGrammarButton.style.marginTop = '10px';
+autoGrammarButton.style.marginBottom = '10px';
+autoGrammarButton.style.marginLeft = '10px';
+autoGrammarButton.style.marginRight = '10px';
+autoGrammarButton.style.backgroundColor = 'grey';
+autoGrammarButton.style.color = 'white';
+autoGrammarButton.style.border = 'none';
+autoGrammarButton.style.borderRadius = '5px';
+autoGrammarButton.style.padding = '12px 20px';
+autoGrammarButton.style.cursor = 'pointer';
+autoGrammarButton.style.fontSize = '14px';
+autoGrammarButton.style.fontWeight = '500';
+autoGrammarButton.style.transition = 'all 0.3s ease';
+autoGrammarButton.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+
+const checkGrammar = async (textarea) => {
+    const text = textarea.value;
+    if (!text) return;
+
+    try {
+        const response = await fetch('https://grammar-checker-j30b.onrender.com/grammar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) {
+            throw new Error('Grammar check request failed');
+        }
+
+        const result = await response.json();
+        if (result["Corrected Text"] && result["Corrected Text"] !== "") {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = result["Corrected Text"];
+            
+            const errorTexts = Array.from(tempDiv.querySelectorAll('.error-text'))
+                .map(el => el.textContent);
+
+            errorTexts.forEach(errorText => {
+                const startIndex = text.indexOf(errorText);
+                if (startIndex !== -1) {
+                    const endIndex = startIndex + errorText.length;
+                    const wrapper = document.createElement('span');
+                    wrapper.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                    wrapper.style.borderBottom = '2px wavy red';
+                    wrapper.textContent = errorText;
+                    const before = text.substring(0, startIndex);
+                    const after = text.substring(endIndex);
+                    textarea.value = before + wrapper.outerHTML + after;
+                }
+            });
+
+            let resultParagraph = textarea.nextElementSibling;
+            if (!resultParagraph || !resultParagraph.classList.contains('grammar-result')) {
+                resultParagraph = document.createElement('p');
+                resultParagraph.classList.add('grammar-result');
+                textarea.parentNode.insertBefore(resultParagraph, textarea.nextSibling);
+            }
+
+            resultParagraph.style.backgroundColor = '#444';
+            resultParagraph.style.color = '#fff';
+            resultParagraph.style.padding = '10px';
+            resultParagraph.style.borderRadius = '5px';
+            resultParagraph.style.marginTop = '5px';
+            resultParagraph.style.fontSize = '14px';
+            resultParagraph.style.display = 'block';
+            resultParagraph.textContent = result["Corrected Text"];
+
+            setTimeout(() => {
+                resultParagraph.remove();
+            }, 5000);
+        }
+    } catch (error) {
+    }
+};
+
+const setupGrammarCheck = () => {
+    const textareas = document.querySelectorAll('input[name^="exampleConversation"], textarea[name="description"], textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"], input[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"], textarea[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-1 rounded-l-none"][id^=":"][aria-describedby^=":"]');
+    
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', () => {
+            clearTimeout(textarea.grammarTimeout);
+            textarea.grammarTimeout = setTimeout(() => {
+                checkGrammar(textarea);
+            }, 1000);
+        });
+    });
+};
+
+const grammarObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length) {
+            setupGrammarCheck();
+        }
+    });
+});
+
+grammarObserver.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+setupGrammarCheck();
+
+autoGrammarButton.onclick = () => {
+    const textareas = document.querySelectorAll('input[name^="exampleConversation"], textarea[name="description"], textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"], input[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"], textarea[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-1 rounded-l-none"][id^=":"][aria-describedby^=":"]');
+    textareas.forEach(textarea => {
+        checkGrammar(textarea);
+    });
+    alert('Grammar check initialized for all text areas');
+};
+
+overlayContent.appendChild(autoGrammarButton);
+overlayContent.appendChild(autoLoadButton)
+overlayContent.appendChild(dynamicButton)
+
 const horizontalRule2 = document.createElement('hr');
 horizontalRule2.style.border = 'none';
 horizontalRule2.style.borderTop = '1px solid #ccc';
@@ -2120,10 +2240,8 @@ async function submitPrompt(requestData) {
 }
 
 floatingUI.appendChild(promptLibraryButton);
-floatingUI.appendChild(autoLoadButton);
 floatingUI.appendChild(promptButton);
 floatingUI.appendChild(settingsButton);
-floatingUI.appendChild(dynamicButton);
 floatingUI.appendChild(autoSummaryButton);
 floatingUI.appendChild(createCharacterButton);
 
@@ -2514,71 +2632,98 @@ setTimeout(() => {
     }, 500);
 }, 5000);
 
+const checkGrammar = async (textarea) => {
+    const text = textarea.value;
+    if (!text) return;
 
-const textarea = document.querySelectorAll('textarea[placeholder="Message"][class="w-full resize-none bg-transparent py-[1.375rem] text-base focus-within:outline-none disabled:opacity-80 flex-1"][style="height: 51px !important;"]');
+    try {
+        const response = await fetch('https://grammar-checker-j30b.onrender.com/grammar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text })
+        });
 
-textarea.forEach(textarea => {
-    const updatePreview = () => {
-        const text = textarea.value;
-        console.log('Updating preview for:', text);
-        
-        let markdownText = text
-            .replace(/```([^`]*?)```/gs, '<pre><code>$1</code></pre>')
-            .replace(/!\[(.*?)\]\((.*?)\)/g, '<img alt="$1" src="$2">')
-            .replace(/(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg))/g, '<img src="$1" alt="Image" style="max-width: 100%; height: auto;">')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/`(.*?)`/g, '<code>$1</code>')
-            .replace(/~~(.*?)~~/g, '<del>$1</del>')
-            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
-            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-            .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
-            .replace(/^- (.*$)/gm, '<li>$1</li>')
-            .replace(/^([0-9]+)\. (.*$)/gm, '<li>$2</li>')
-            .replace(/^---$/gm, '<hr>')
-            .replace(/\^\^(.*?)\^\^/g, '<sup>$1</sup>')
-            .replace(/~(.*?)~/g, '<sub>$1</sub>')
-            .replace(/\=\=(.*?)\=\=/g, '<mark>$1</mark>')
-            .replace(/^```(\w+)\n([\s\S]*?)```$/gm, '<pre><code class="language-$1">$2</code></pre>');
-
-        const base64Regex = /data:image\/[a-z]+;base64,[A-Za-z0-9+/=]+/g;
-        markdownText = markdownText.replace(base64Regex, match => 
-            `<img src="${match}" alt="Base64 Image" style="max-width: 100%; height: auto;">`
-        );
-
-        let previewDiv = textarea.nextElementSibling;
-        if (!previewDiv || !previewDiv.classList.contains('markdown-preview')) {
-            previewDiv = document.createElement('div');
-            previewDiv.classList.add('markdown-preview');
-            previewDiv.style.position = 'absolute';
-            previewDiv.style.top = '100%';
-            previewDiv.style.left = '0';
-            previewDiv.style.width = '100%';
-            previewDiv.style.backgroundColor = '#1a1a1a';
-            previewDiv.style.padding = '10px';
-            previewDiv.style.borderRadius = '5px';
-            previewDiv.style.zIndex = '1000';
-            previewDiv.style.color = '#fff';
-            textarea.parentNode.style.position = 'relative';
-            textarea.parentNode.appendChild(previewDiv);
+        if (!response.ok) {
+            throw new Error('Grammar check request failed');
         }
 
-        previewDiv.innerHTML = markdownText;
-        previewDiv.style.display = 'block';
-        console.log('Preview updated:', markdownText);
-    };
+        const result = await response.json();
+        if (result["Corrected Text"] && result["Corrected Text"] !== "") {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = result["Corrected Text"];
+            
+            const errorTexts = Array.from(tempDiv.querySelectorAll('.error-text'))
+                .map(el => el.textContent);
 
-    const observer = new MutationObserver(updatePreview);
+            errorTexts.forEach(errorText => {
+                const startIndex = text.indexOf(errorText);
+                if (startIndex !== -1) {
+                    const endIndex = startIndex + errorText.length;
+                    const wrapper = document.createElement('span');
+                    wrapper.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                    wrapper.style.borderBottom = '2px wavy red';
+                    wrapper.textContent = errorText;
+                    const before = text.substring(0, startIndex);
+                    const after = text.substring(endIndex);
+                    textarea.value = before + wrapper.outerHTML + after;
+                }
+            });
 
-    observer.observe(textarea, {
-        attributes: true,
-        characterData: true,
-        childList: true,
-        subtree: true
+            let resultParagraph = textarea.nextElementSibling;
+            if (!resultParagraph || !resultParagraph.classList.contains('grammar-result')) {
+                resultParagraph = document.createElement('p');
+                resultParagraph.classList.add('grammar-result');
+                textarea.parentNode.insertBefore(resultParagraph, textarea.nextSibling);
+            }
+
+            resultParagraph.style.backgroundColor = '#444';
+            resultParagraph.style.color = '#fff';
+            resultParagraph.style.padding = '15px';
+            resultParagraph.style.borderRadius = '8px';
+            resultParagraph.style.marginTop = '10px';
+            resultParagraph.style.fontSize = '16px';
+            resultParagraph.style.display = 'block';
+            resultParagraph.style.transition = 'opacity 0.5s ease-in-out';
+            resultParagraph.textContent = result["Corrected Text"];
+            resultParagraph.style.opacity = '1';
+
+            setTimeout(() => {
+                resultParagraph.style.opacity = '0';
+                setTimeout(() => {
+                    resultParagraph.remove();
+                }, 500);
+            }, 5000);
+        }
+    } catch (error) {
+    }
+};
+
+const setupGrammarCheck = () => {
+    const textareas = document.querySelectorAll('input[name^="exampleConversation"], textarea[name="description"], textarea[name="persona"], textarea[name="scenario"], textarea[name="instructions"], textarea[name="firstMessage"], input[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"], textarea[class="border-input placeholder:text-muted-foreground flex h-9 w-full rounded-full border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 flex-1 rounded-l-none"][id^=":"][aria-describedby^=":"]');
+
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', () => {
+            clearTimeout(textarea.grammarTimeout);
+            textarea.grammarTimeout = setTimeout(() => {
+                checkGrammar(textarea);
+            }, 1000);
+        });
     });
+};
 
-    updatePreview();
-    textarea.addEventListener('input', updatePreview);
+const grammarObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length) {
+            setupGrammarCheck();
+        }
+    });
 });
+
+grammarObserver.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+setupGrammarCheck();
