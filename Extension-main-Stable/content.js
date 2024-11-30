@@ -1424,7 +1424,7 @@ const checkGrammar = async (textarea) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ text })
+            body: JSON.stringify({ text, language })
         });
 
         if (!response.ok) {
@@ -2636,13 +2636,23 @@ const checkGrammar = async (textarea) => {
     const text = textarea.value;
     if (!text) return;
 
+    let language;
+    if (!window.languagePromptShown) {
+        language = prompt("Please choose a language: en, de, es, fr");
+        if (!['en', 'de', 'es', 'fr'].includes(language)) {
+            alert("Invalid language selected. Please choose from en, de, es, fr.");
+            return;
+        }
+        window.languagePromptShown = true;
+    }
+
     try {
         const response = await fetch('https://grammar-checker-j30b.onrender.com/grammar', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ text })
+            body: JSON.stringify({ text, language })
         });
 
         if (!response.ok) {
