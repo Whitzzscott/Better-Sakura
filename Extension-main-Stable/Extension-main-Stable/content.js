@@ -3597,7 +3597,6 @@ const loginStatusCheck = async () => {
             window.location.href = 'mailto:whitzscott@gmail.com';
         };
         overlayContent.appendChild(softMemoryButton);
-        overlayContent.appendChild(clearStorageButton);
         overlayContent.appendChild(converterButton);
         overlayContent.appendChild(purgeArchiveButton);
         overlayContent.appendChild(stopButton);
@@ -3608,8 +3607,10 @@ const loginStatusCheck = async () => {
         overlayContent.appendChild(loginButton);
         overlayContent.appendChild(registerButton);
         overlayContent.appendChild(logoutButton);
+        overlayContent.appendChild(clearStorageButton);
         overlayContent.appendChild(bugReportButton);
         overlayContent.appendChild(feedbackButton);
+        overlayContent.appendChild(updateButton);
         overlayContent.appendChild(contactButton);
         overlayContent.appendChild(privacyPolicyButton);
         overlayContent.appendChild(contributionButton);
