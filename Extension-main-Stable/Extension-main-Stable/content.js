@@ -4133,7 +4133,7 @@ const loginStatusCheck = async () => {
         
         const fetchVersion = async () => {
             try {
-                const response = await fetch('https://raw.githubusercontent.com/Whitzzscott/Better-Sakura/master/Extension-main-Stable/manifest.json');
+                const response = await fetch('https://raw.githubusercontent.com/Whitzzscott/Better-Sakura/main/Extension-main-Stable/Extension-main-Stable/manifest.json');
                 if (!response.ok) throw new Error('Failed to fetch manifest');
                 const manifest = await response.json();
                 const version = manifest.version;
