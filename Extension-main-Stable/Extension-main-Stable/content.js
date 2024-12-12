@@ -4133,7 +4133,7 @@ const loginStatusCheck = async () => {
         
         const fetchVersion = async () => {
             try {
-                const response = await fetch('https://raw.githubusercontent.com/Whitzzscott/Better-Sakura/main/Extension-main-Stable/manifest.json');
+                const response = await fetch('https://raw.githubusercontent.com/Whitzzscott/Better-Sakura/master/Extension-main-Stable/manifest.json');
                 if (!response.ok) throw new Error('Failed to fetch manifest');
                 const manifest = await response.json();
                 const version = manifest.version;
@@ -4143,6 +4143,10 @@ const loginStatusCheck = async () => {
                 versionText.appendChild(versionDisplay);
             } catch (error) {
                 console.error('Error fetching version:', error);
+                const versionDisplay = document.createElement('span');
+                versionDisplay.textContent = 'Unknown';
+                versionDisplay.style.fontWeight = 'bold';
+                versionText.appendChild(versionDisplay);
             }
         };
         
@@ -5360,5 +5364,7 @@ if (window.location.href.includes('sakura.fm')) {
     checkCharacterDiv();
 }
 }
-loginStatusCheck();
-checkLoginStatus();
+window.addEventListener('load', () => {
+    loginStatusCheck();
+    checkLoginStatus();
+});
