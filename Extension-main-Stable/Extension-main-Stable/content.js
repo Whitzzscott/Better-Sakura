@@ -2110,31 +2110,6 @@ const loginStatusCheck = async () => {
             window.open(creatingUrl, '_blank', 'width=600,height=400');
         };
         
-        const purgeArchiveButton = document.createElement('button');
-        purgeArchiveButton.textContent = '🗑️ Purge Archive Chats';
-        purgeArchiveButton.style.width = '100%';
-        purgeArchiveButton.style.height = '50px';
-        purgeArchiveButton.style.margin = '10px 0';
-        purgeArchiveButton.style.borderRadius = '8px';
-        purgeArchiveButton.style.backgroundColor = '#555';
-        purgeArchiveButton.style.color = 'white';
-        purgeArchiveButton.style.border = 'none';
-        purgeArchiveButton.style.cursor = 'pointer';
-        purgeArchiveButton.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-        purgeArchiveButton.style.fontSize = '16px';
-        purgeArchiveButton.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.5)';
-        purgeArchiveButton.style.fontFamily = 'Arial, sans-serif';
-        purgeArchiveButton.style.transform = 'scale(1)';
-        purgeArchiveButton.onmouseover = () => {
-            purgeArchiveButton.style.transform = 'translateY(-3px)';
-            purgeArchiveButton.style.boxShadow = '0 8px 20px rgba(220, 53, 69, 0.4)';
-        };
-        
-        purgeArchiveButton.onmouseout = () => {
-            purgeArchiveButton.style.transform = 'translateY(0)';
-            purgeArchiveButton.style.boxShadow = '0 4px 15px rgba(220, 53, 69, 0.3)';
-
-        };
         
         const stopButton = document.createElement('button');
         stopButton.textContent = '⏹️ Stop Purge';
@@ -2176,39 +2151,7 @@ const loginStatusCheck = async () => {
             }
         };
 
-        const purgeContent = () => {
-            const ulElement = document.querySelector('ul.flex.w-full.flex-col.gap-4.py-4');
-            if (ulElement) {
-                const liElements = ulElement.querySelectorAll('li');
-                liElements.forEach((li) => {
-                    li.remove();
-                });
-        
-                const divElements = ulElement.querySelectorAll('div[data-orientation="horizontal"][role="none"]');
-                divElements.forEach((div) => {
-                    div.remove();
-                });
-        
-                ulElement.remove();
-            }
-        };
-                
-        purgeArchiveButton.onclick = () => {
-            const ulElement = document.querySelector('ul.flex.w-full.flex-col.gap-4.py-4');
-            if (ulElement) {
-                const liElements = ulElement.querySelectorAll('li');
-                liElements.forEach((li) => {
-                    li.remove();
-                });
-        
-                const divElements = ulElement.querySelectorAll('div[data-orientation="horizontal"][role="none"]');
-                divElements.forEach((div) => {
-                    div.remove();
-                });
-        
-                ulElement.remove();
-            }
-        };
+       
         const contributionButton = document.createElement('button');
         contributionButton.textContent = '🌟 Contribution';
         contributionButton.style.width = '100%';
@@ -2728,28 +2671,39 @@ const loginStatusCheck = async () => {
             softMemoryButton.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.5)';
         };
         softMemoryButton.onclick = () => {
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+            overlay.style.backdropFilter = 'blur(8px)';
+            overlay.style.zIndex = '9999';
+            overlay.className = 'animate__animated animate__fadeIn';
+
             const chatUI = document.createElement('div');
             chatUI.className = 'animate__animated animate__fadeIn';
             chatUI.style.position = 'fixed';
             chatUI.style.top = '50%';
             chatUI.style.left = '50%';
             chatUI.style.transform = 'translate(-50%, -50%)';
-            chatUI.style.backgroundColor = '#1a1f2e';
-            chatUI.style.padding = '35px';
-            chatUI.style.borderRadius = '25px';
-            chatUI.style.boxShadow = '0 15px 50px rgba(0, 0, 0, 0.3)';
-            chatUI.style.width = '90%';
-            chatUI.style.maxWidth = '600px';
+            chatUI.style.backgroundColor = '#0f1218';
+            chatUI.style.padding = '25px';
+            chatUI.style.borderRadius = '24px';
+            chatUI.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.5)';
+            chatUI.style.width = '95%';
+            chatUI.style.maxWidth = '450px';
             chatUI.style.height = '85vh';
-            chatUI.style.maxHeight = '800px';
+            chatUI.style.maxHeight = '700px';
             chatUI.style.display = 'flex';
             chatUI.style.flexDirection = 'column';
             chatUI.style.zIndex = '10000';
-            chatUI.style.backdropFilter = 'blur(10px)';
-            chatUI.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+            chatUI.style.backdropFilter = 'blur(15px)';
+            chatUI.style.border = '1px solid rgba(255, 255, 255, 0.15)';
 
             const chatHeader = document.createElement('div');
-            chatHeader.style.marginBottom = '25px';
+            chatHeader.style.marginBottom = '20px';
             chatHeader.style.textAlign = 'center';
             chatHeader.style.position = 'relative';
             
@@ -2758,47 +2712,48 @@ const loginStatusCheck = async () => {
             chatTitle.style.color = '#fff';
             chatTitle.style.fontSize = '24px';
             chatTitle.style.margin = '0';
-            chatTitle.style.fontWeight = '600';
-            chatTitle.style.letterSpacing = '0.5px';
+            chatTitle.style.fontWeight = '700';
+            chatTitle.style.letterSpacing = '0.8px';
+            chatTitle.style.textShadow = '0 2px 4px rgba(0,0,0,0.3)';
             chatHeader.appendChild(chatTitle);
 
             const chatMessages = document.createElement('div');
             chatMessages.className = 'animate__animated animate__fadeIn';
             chatMessages.style.flex = '1';
             chatMessages.style.overflowY = 'auto';
-            chatMessages.style.marginBottom = '25px';
-            chatMessages.style.padding = '25px';
-            chatMessages.style.backgroundColor = 'rgba(52, 73, 94, 0.4)';
-            chatMessages.style.borderRadius = '20px';
+            chatMessages.style.marginBottom = '20px';
+            chatMessages.style.padding = '20px';
+            chatMessages.style.backgroundColor = 'rgba(30, 41, 59, 0.6)';
+            chatMessages.style.borderRadius = '18px';
             chatMessages.style.scrollBehavior = 'smooth';
-            chatMessages.style.boxShadow = 'inset 0 2px 10px rgba(0,0,0,0.1)';
+            chatMessages.style.boxShadow = 'inset 0 2px 15px rgba(0,0,0,0.2)';
 
             const inputContainer = document.createElement('div');
             inputContainer.className = 'animate__animated animate__fadeInUp';
             inputContainer.style.display = 'flex';
-            inputContainer.style.gap = '15px';
+            inputContainer.style.gap = '12px';
             inputContainer.style.marginTop = 'auto';
             inputContainer.style.position = 'relative';
 
             const input = document.createElement('input');
             input.style.flex = '1';
-            input.style.padding = '18px 25px';
+            input.style.padding = '15px 20px';
             input.style.borderRadius = '15px';
-            input.style.border = '2px solid rgba(155, 89, 182, 0.3)';
-            input.style.backgroundColor = 'rgba(52, 73, 94, 0.3)';
+            input.style.border = '2px solid rgba(155, 89, 182, 0.4)';
+            input.style.backgroundColor = 'rgba(30, 41, 59, 0.6)';
             input.style.color = 'white';
-            input.style.fontSize = '16px';
+            input.style.fontSize = '15px';
             input.style.transition = 'all 0.3s ease';
-            input.style.backdropFilter = 'blur(5px)';
+            input.style.backdropFilter = 'blur(8px)';
             input.placeholder = 'Type your message...';
 
             input.onfocus = () => {
-                input.style.border = '2px solid rgba(155, 89, 182, 0.8)';
-                input.style.boxShadow = '0 0 20px rgba(155, 89, 182, 0.2)';
+                input.style.border = '2px solid rgba(155, 89, 182, 0.9)';
+                input.style.boxShadow = '0 0 25px rgba(155, 89, 182, 0.3)';
             };
 
             input.onblur = () => {
-                input.style.border = '2px solid rgba(155, 89, 182, 0.3)';
+                input.style.border = '2px solid rgba(155, 89, 182, 0.4)';
                 input.style.boxShadow = 'none';
             };
 
@@ -2818,7 +2773,7 @@ const loginStatusCheck = async () => {
             sendButton.onmouseenter = () => {
                 sendButton.style.transform = 'scale(1.05) translateY(-2px)';
                 sendButton.style.backgroundColor = '#8e44ad';
-                sendButton.style.boxShadow = '0 5px 15px rgba(155, 89, 182, 0.4)';
+                sendButton.style.boxShadow = '0 8px 20px rgba(155, 89, 182, 0.5)';
             };
 
             sendButton.onmouseleave = () => {
@@ -2830,13 +2785,13 @@ const loginStatusCheck = async () => {
             const closeButton = document.createElement('button');
             closeButton.innerHTML = '<i class="fas fa-times"></i>';
             closeButton.style.position = 'absolute';
-            closeButton.style.right = '20px';
-            closeButton.style.top = '20px';
-            closeButton.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            closeButton.style.right = '15px';
+            closeButton.style.top = '15px';
+            closeButton.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
             closeButton.style.border = 'none';
             closeButton.style.color = 'white';
-            closeButton.style.width = '40px';
-            closeButton.style.height = '40px';
+            closeButton.style.width = '36px';
+            closeButton.style.height = '36px';
             closeButton.style.borderRadius = '12px';
             closeButton.style.cursor = 'pointer';
             closeButton.style.transition = 'all 0.3s ease';
@@ -3237,11 +3192,11 @@ const loginStatusCheck = async () => {
             bugReportUI.style.left = '50%';
             bugReportUI.style.transform = 'translate(-50%, -50%)';
             bugReportUI.style.backgroundColor = '#1a1f2e';
-            bugReportUI.style.padding = '35px';
-            bugReportUI.style.borderRadius = '25px';
+            bugReportUI.style.padding = '20px';
+            bugReportUI.style.borderRadius = '20px';
             bugReportUI.style.boxShadow = '0 15px 50px rgba(0, 0, 0, 0.3)';
-            bugReportUI.style.width = '90%';
-            bugReportUI.style.maxWidth = '600px';
+            bugReportUI.style.width = '85%';
+            bugReportUI.style.maxWidth = '400px';
             bugReportUI.style.zIndex = '10000';
             bugReportUI.style.backdropFilter = 'blur(10px)';
             bugReportUI.style.border = '1px solid rgba(255, 255, 255, 0.1)';
@@ -3249,48 +3204,48 @@ const loginStatusCheck = async () => {
             const title = document.createElement('h2');
             title.textContent = '🐛 Report a Bug';
             title.style.color = '#fff';
-            title.style.marginBottom = '25px';
-            title.style.fontSize = '24px';
+            title.style.marginBottom = '15px';
+            title.style.fontSize = '20px';
             title.style.textAlign = 'center';
 
             const input = document.createElement('textarea');
             input.style.width = '100%';
-            input.style.height = '200px';
-            input.style.padding = '15px';
-            input.style.marginBottom = '20px';
-            input.style.borderRadius = '15px';
+            input.style.height = '150px';
+            input.style.padding = '12px';
+            input.style.marginBottom = '15px';
+            input.style.borderRadius = '12px';
             input.style.border = '2px solid rgba(255, 255, 255, 0.1)';
             input.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
             input.style.color = 'white';
-            input.style.fontSize = '16px';
+            input.style.fontSize = '14px';
             input.style.resize = 'none';
             input.placeholder = 'Please describe the bug in detail...';
 
             const buttonContainer = document.createElement('div');
             buttonContainer.style.display = 'flex';
-            buttonContainer.style.gap = '15px';
+            buttonContainer.style.gap = '10px';
             buttonContainer.style.justifyContent = 'flex-end';
 
             const sendButton = document.createElement('button');
             sendButton.textContent = 'Send Report';
-            sendButton.style.padding = '12px 25px';
-            sendButton.style.borderRadius = '12px';
+            sendButton.style.padding = '10px 20px';
+            sendButton.style.borderRadius = '10px';
             sendButton.style.border = 'none';
             sendButton.style.backgroundColor = '#4CAF50';
             sendButton.style.color = 'white';
             sendButton.style.cursor = 'pointer';
-            sendButton.style.fontSize = '16px';
+            sendButton.style.fontSize = '14px';
             sendButton.style.transition = 'all 0.3s ease';
 
             const closeButton = document.createElement('button');
             closeButton.textContent = 'Cancel';
-            closeButton.style.padding = '12px 25px';
-            closeButton.style.borderRadius = '12px';
+            closeButton.style.padding = '10px 20px';
+            closeButton.style.borderRadius = '10px';
             closeButton.style.border = 'none';
             closeButton.style.backgroundColor = '#ff4444';
             closeButton.style.color = 'white';
             closeButton.style.cursor = 'pointer';
-            closeButton.style.fontSize = '16px';
+            closeButton.style.fontSize = '14px';
             closeButton.style.transition = 'all 0.3s ease';
 
             sendButton.onclick = async () => {
@@ -3366,13 +3321,14 @@ const loginStatusCheck = async () => {
             feedbackUI.style.left = '50%';
             feedbackUI.style.transform = 'translate(-50%, -50%)';
             feedbackUI.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
-            feedbackUI.style.padding = '30px';
+            feedbackUI.style.padding = '20px';
             feedbackUI.style.borderRadius = '20px';
             feedbackUI.style.zIndex = '10000';
             feedbackUI.style.display = 'flex';
             feedbackUI.style.flexDirection = 'column';
-            feedbackUI.style.gap = '20px';
-            feedbackUI.style.minWidth = '400px';
+            feedbackUI.style.gap = '15px';
+            feedbackUI.style.width = '90%';
+            feedbackUI.style.maxWidth = '350px';
             feedbackUI.className = 'animate__animated animate__fadeIn';
 
             const title = document.createElement('h2');
@@ -3380,11 +3336,12 @@ const loginStatusCheck = async () => {
             title.style.color = 'white';
             title.style.margin = '0';
             title.style.textAlign = 'center';
+            title.style.fontSize = '20px';
 
             const input = document.createElement('textarea');
             input.style.width = '100%';
-            input.style.height = '150px';
-            input.style.padding = '15px';
+            input.style.height = '120px';
+            input.style.padding = '12px';
             input.style.borderRadius = '10px';
             input.style.border = '2px solid #444';
             input.style.backgroundColor = '#333';
@@ -3395,29 +3352,29 @@ const loginStatusCheck = async () => {
 
             const buttonContainer = document.createElement('div');
             buttonContainer.style.display = 'flex';
-            buttonContainer.style.gap = '10px';
+            buttonContainer.style.gap = '8px';
             buttonContainer.style.justifyContent = 'flex-end';
 
             const sendButton = document.createElement('button');
             sendButton.textContent = 'Send';
-            sendButton.style.padding = '12px 25px';
-            sendButton.style.borderRadius = '12px';
+            sendButton.style.padding = '10px 20px';
+            sendButton.style.borderRadius = '10px';
             sendButton.style.border = 'none';
             sendButton.style.backgroundColor = '#4CAF50';
             sendButton.style.color = 'white';
             sendButton.style.cursor = 'pointer';
-            sendButton.style.fontSize = '16px';
+            sendButton.style.fontSize = '14px';
             sendButton.style.transition = 'all 0.3s ease';
 
             const closeButton = document.createElement('button');
             closeButton.textContent = 'Cancel';
-            closeButton.style.padding = '12px 25px';
-            closeButton.style.borderRadius = '12px';
+            closeButton.style.padding = '10px 20px';
+            closeButton.style.borderRadius = '10px';
             closeButton.style.border = 'none';
             closeButton.style.backgroundColor = '#ff4444';
             closeButton.style.color = 'white';
             closeButton.style.cursor = 'pointer';
-            closeButton.style.fontSize = '16px';
+            closeButton.style.fontSize = '14px';
             closeButton.style.transition = 'all 0.3s ease';
 
             sendButton.onclick = async () => {
@@ -3559,14 +3516,15 @@ const loginStatusCheck = async () => {
         contactButton.onclick = () => {
             window.location.href = 'mailto:whitzscott@gmail.com';
         };
-        overlayContent.appendChild(softMemoryButton);
-        overlayContent.appendChild(converterButton);
-        overlayContent.appendChild(purgeArchiveButton);
+
         overlayContent.appendChild(stopButton);
         overlayContent.appendChild(registerButton);
         overlayContent.appendChild(autoGrammarButton);
         overlayContent.appendChild(autoLoadButton);
         overlayContent.appendChild(dynamicButton);
+        overlayContent.appendChild(softMemoryButton);
+        overlayContent.appendChild(purgeArchiveButton);
+        overlayContent.appendChild(converterButton);
         overlayContent.appendChild(loginButton);
         overlayContent.appendChild(registerButton);
         overlayContent.appendChild(logoutButton);
@@ -4306,29 +4264,27 @@ const loginStatusCheck = async () => {
         floatingUI.appendChild(settingsButton);
         floatingUI.appendChild(autoSummaryButton);
         floatingUI.appendChild(createCharacterButton);
-        
         floatingUI.style.position = 'fixed';
-        floatingUI.style.left = '20px';
-        floatingUI.style.top = '20px';
-        floatingUI.style.width = '50vw';
-        floatingUI.style.maxWidth = '180px';
+        floatingUI.style.left = '15px';
+        floatingUI.style.top = '15px';
+        floatingUI.style.width = '40vw';
+        floatingUI.style.maxWidth = '160px';
         floatingUI.style.borderRadius = '12px';
         floatingUI.style.zIndex = '10000';
         floatingUI.style.padding = '12px';
         floatingUI.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-        floatingUI.style.transform = 'scale(0.8) translateY(-20px)';
+        floatingUI.style.transform = 'scale(0.95) translateY(-10px)';
         floatingUI.style.opacity = '0';
-        floatingUI.style.fontSize = '14px';
+        floatingUI.style.fontSize = '13px';
         floatingUI.style.overflowY = 'auto';
-        floatingUI.style.maxHeight = '70vh';
-        floatingUI.style.backgroundColor = 'rgba(44, 44, 44, 0.7)';
-        floatingUI.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
-        floatingUI.style.border = '1px solid rgba(255,255,255,0.1)';
-        floatingUI.style.backdropFilter = 'blur(4px)';
+        floatingUI.style.maxHeight = '60vh';
+        floatingUI.style.backgroundColor = 'rgba(23, 25, 35, 0.9)';
+        floatingUI.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15)';
+        floatingUI.style.border = '1px solid rgba(255, 255, 255, 0.15)';
+        floatingUI.style.backdropFilter = 'blur(8px)';
         floatingUI.style.scrollbarWidth = 'thin';
-        floatingUI.style.scrollbarColor = 'rgba(255,255,255,0.2) transparent';
-        floatingUI.style.animation = 'fadeInScale 0.5s ease-out';
-        
+        floatingUI.style.scrollbarColor = 'rgba(255, 255, 255, 0.3) transparent';
+        floatingUI.style.animation = 'fadeInScale 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
         setTimeout(() => {
             floatingUI.style.transform = 'scale(1) translateY(0)';
             floatingUI.style.opacity = '1';
@@ -5081,50 +5037,34 @@ const loginStatusCheck = async () => {
             })();
         }
         
-        window.addEventListener('beforeunload', () => {
-            if (!localStorage.getItem('Purgestop')) {
-                const ulElement = document.querySelector('ul.flex.w-full.flex-col.gap-4.py-4');
-                if (ulElement) {
-                    const liElements = ulElement.querySelectorAll('li');
-                    liElements.forEach((li) => {
-                        li.remove();
-                    });
+        function clearElements() {
+            const ulElement = document.querySelector('ul.flex.w-full.flex-col.gap-4.py-4');
             
-                    const divElements = ulElement.querySelectorAll('div[data-orientation="horizontal"][role="none"]');
-                    divElements.forEach((div) => {
-                        div.remove();
-                    });
-            
-                    ulElement.remove();
-                }
-            }
-        });
-        
-        setInterval(() => {
-            if (!localStorage.getItem('Purgestop')) {
-                const ulElement = document.querySelector('ul.flex.w-full.flex-col.gap-4.py-4');
-                if (ulElement) {
-                    const liElements = ulElement.querySelectorAll('li');
-                    liElements.forEach((li) => {
-                        li.remove();
-                    });
-            
-                    const divElements = ulElement.querySelectorAll('div[data-orientation="horizontal"][role="none"]');
-                    divElements.forEach((div) => {
-                        div.remove();
-                    });
-            
-                    ulElement.remove();
-                }
+            if (ulElement) {
+                const previousH3 = ulElement.previousElementSibling;
                 
-                const loadMoreButton = document.querySelector('button.inline-flex.items-center.justify-center.rounded-full.text-sm.transition-colors.focus-visible\\:outline-none.disabled\\:pointer-events-none.disabled\\:opacity-50.select-none.bg-primary.text-primary-foreground.shadow.hover\\:bg-primary\\/90.active\\:bg-primary\\/90.h-9.px-4.py-2.mb-4.max-md\\:w-full');
-                if (loadMoreButton) {
-                    loadMoreButton.remove();
+                if (previousH3 && previousH3.tagName === 'H3' && previousH3.textContent === 'Your deleted chats') {
+                    const liElements = ulElement.querySelectorAll('li');
+                    
+                    liElements.forEach(li => {
+                        const chatLink = li.querySelector('a.rounded-full.text-sm');
+                        if (chatLink) {
+                            li.remove();
+                        }
+                    });
                 }
             }
-        }, 10);
+        }
+        function checkAndClear() {
+            if (!localStorage.getItem('Purgestop')) {
+                clearElements();
+            }
+        }
 
+        window.addEventListener('beforeunload', clearElements);
+        setInterval(checkAndClear, 10);
     }
+    
 if (window.location.href.includes('sakura.fm')) {
     const fontAwesomeCDN = document.createElement('link');
     fontAwesomeCDN.rel = 'stylesheet';
