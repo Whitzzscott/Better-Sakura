@@ -2860,7 +2860,9 @@ const loginStatusCheck = async () => {
                         menu.style.transform = 'scale(0.95)';
                         menu.style.opacity = '0';
                         setTimeout(() => {
-                            document.body.removeChild(menu);
+                            if (menu.parentNode) {
+                                menu.parentNode.removeChild(menu);
+                            }
                             option.action();
                         }, 200);
                     };
@@ -3523,7 +3525,6 @@ const loginStatusCheck = async () => {
         overlayContent.appendChild(autoLoadButton);
         overlayContent.appendChild(dynamicButton);
         overlayContent.appendChild(softMemoryButton);
-        overlayContent.appendChild(purgeArchiveButton);
         overlayContent.appendChild(converterButton);
         overlayContent.appendChild(loginButton);
         overlayContent.appendChild(registerButton);
@@ -5038,22 +5039,33 @@ const loginStatusCheck = async () => {
         }
         
         function clearElements() {
-            const ulElement = document.querySelector('ul.flex.w-full.flex-col.gap-4.py-4');
+            const ulElements = document.querySelectorAll('ul.flex.w-full.flex-col.gap-4.py-4');
             
-            if (ulElement) {
-                const previousH3 = ulElement.previousElementSibling;
-                
-                if (previousH3 && previousH3.tagName === 'H3' && previousH3.textContent === 'Your deleted chats') {
-                    const liElements = ulElement.querySelectorAll('li');
+            ulElements.forEach(ulElement => {
+                if (ulElement) {
+                    const h3Elements = document.querySelectorAll('h3');
+                    let targetH3;
                     
-                    liElements.forEach(li => {
-                        const chatLink = li.querySelector('a.rounded-full.text-sm');
-                        if (chatLink) {
-                            li.remove();
+                    for (const h3 of h3Elements) {
+                        if (h3.textContent === 'Your deleted chats') {
+                            targetH3 = h3;
+                            break;
                         }
-                    });
+                    }
+                    
+                    if (targetH3 && targetH3.nextElementSibling === ulElement) {
+                        const liElements = ulElement.querySelectorAll('li');
+                        liElements.forEach(li => {
+                            const chatLink = li.querySelector('a.rounded-full.text-sm');
+                            if (chatLink) {
+                                li.remove();
+                            }
+                        });
+                    }
+                    
+                    ulElement.remove();
                 }
-            }
+            });
         }
         function checkAndClear() {
             if (!localStorage.getItem('Purgestop')) {
