@@ -3519,12 +3519,144 @@ const loginStatusCheck = async () => {
             window.location.href = 'mailto:whitzscott@gmail.com';
         };
 
+        const searchButton = document.createElement('button');
+        searchButton.textContent = '🔍 Search User';
+        searchButton.style.width = '100%';
+        searchButton.style.height = '50px';
+        searchButton.style.margin = '10px 0';
+        searchButton.style.borderRadius = '8px';
+        searchButton.style.backgroundColor = '#FF5722';
+        searchButton.style.color = 'white';
+        searchButton.style.border = 'none';
+        searchButton.style.cursor = 'pointer';
+        searchButton.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        searchButton.style.fontSize = '16px';
+        searchButton.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.5)';
+        searchButton.style.fontFamily = 'Arial, sans-serif';
+        searchButton.style.transform = 'scale(1)';
+
+        searchButton.onmouseenter = () => {
+            searchButton.style.transform = 'scale(1.05)';
+            searchButton.style.backgroundColor = '#E64A19';
+            searchButton.style.boxShadow = '0 6px 15px rgba(0, 0, 0, 0.6)';
+        };
+
+        searchButton.onmouseleave = () => {
+            searchButton.style.transform = 'scale(1)';
+            searchButton.style.backgroundColor = '#FF5722';
+            searchButton.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.5)';
+        };
+
+        searchButton.onclick = () => {
+            const searchOverlay = document.createElement('div');
+            searchOverlay.style.position = 'fixed';
+            searchOverlay.style.top = '0';
+            searchOverlay.style.left = '0';
+            searchOverlay.style.width = '100%';
+            searchOverlay.style.height = '100%';
+            searchOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+            searchOverlay.style.display = 'flex';
+            searchOverlay.style.justifyContent = 'center';
+            searchOverlay.style.alignItems = 'center';
+            searchOverlay.style.zIndex = '10000';
+            searchOverlay.style.opacity = '0';
+            searchOverlay.style.transition = 'opacity 0.3s ease-in-out';
+            
+            setTimeout(() => {
+                searchOverlay.style.opacity = '1';
+            }, 10);
+
+            const searchContainer = document.createElement('div');
+            searchContainer.style.backgroundColor = '#1a1a1a';
+            searchContainer.style.padding = '30px';
+            searchContainer.style.borderRadius = '15px';
+            searchContainer.style.width = '350px';
+            searchContainer.style.position = 'relative';
+            searchContainer.style.transform = 'scale(0.9)';
+            searchContainer.style.opacity = '0';
+            searchContainer.style.transition = 'all 0.3s ease-in-out';
+            searchContainer.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.5)';
+
+            setTimeout(() => {
+                searchContainer.style.transform = 'scale(1)';
+                searchContainer.style.opacity = '1';
+            }, 100);
+
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '<i class="fas fa-times"></i>';
+            closeButton.style.position = 'absolute';
+            closeButton.style.right = '15px';
+            closeButton.style.top = '15px';
+            closeButton.style.border = 'none';
+            closeButton.style.background = 'none';
+            closeButton.style.color = '#fff';
+            closeButton.style.fontSize = '20px';
+            closeButton.style.cursor = 'pointer';
+            closeButton.style.transition = 'transform 0.2s ease';
+            closeButton.onmouseenter = () => closeButton.style.transform = 'scale(1.1)';
+            closeButton.onmouseleave = () => closeButton.style.transform = 'scale(1)';
+            closeButton.onclick = () => {
+                searchOverlay.style.opacity = '0';
+                setTimeout(() => searchOverlay.remove(), 300);
+            };
+
+            const textarea = document.createElement('textarea');
+            textarea.style.width = '100%';
+            textarea.style.height = '100px';
+            textarea.style.marginBottom = '15px';
+            textarea.style.padding = '15px';
+            textarea.style.borderRadius = '10px';
+            textarea.style.border = '2px solid #333';
+            textarea.style.backgroundColor = '#2a2a2a';
+            textarea.style.color = '#fff';
+            textarea.style.fontSize = '16px';
+            textarea.style.resize = 'none';
+            textarea.placeholder = 'Enter username to search...';
+            textarea.style.transition = 'border-color 0.3s ease';
+            textarea.onfocus = () => textarea.style.borderColor = '#FF5722';
+            textarea.onblur = () => textarea.style.borderColor = '#333';
+
+            const searchIconButton = document.createElement('button');
+            searchIconButton.innerHTML = '<i class="fas fa-search"></i> Search User';
+            searchIconButton.style.width = '100%';
+            searchIconButton.style.padding = '15px';
+            searchIconButton.style.backgroundColor = '#FF5722';
+            searchIconButton.style.color = 'white';
+            searchIconButton.style.border = 'none';
+            searchIconButton.style.borderRadius = '10px';
+            searchIconButton.style.cursor = 'pointer';
+            searchIconButton.style.fontSize = '16px';
+            searchIconButton.style.fontWeight = 'bold';
+            searchIconButton.style.transition = 'all 0.3s ease';
+            searchIconButton.style.transform = 'translateY(0)';
+            searchIconButton.onmouseenter = () => {
+                searchIconButton.style.backgroundColor = '#E64A19';
+                searchIconButton.style.transform = 'translateY(-2px)';
+            };
+            searchIconButton.onmouseleave = () => {
+                searchIconButton.style.backgroundColor = '#FF5722';
+                searchIconButton.style.transform = 'translateY(0)';
+            };
+            searchIconButton.onclick = () => {
+                const username = textarea.value.trim();
+                if (username) {
+                    window.open(`https://www.sakura.fm/user/${username}`, '_blank');
+                }
+            };
+
+            searchContainer.appendChild(closeButton);
+            searchContainer.appendChild(textarea);
+            searchContainer.appendChild(searchIconButton);
+            searchOverlay.appendChild(searchContainer);
+            document.body.appendChild(searchOverlay);
+        };
         overlayContent.appendChild(stopButton);
         overlayContent.appendChild(registerButton);
         overlayContent.appendChild(autoGrammarButton);
         overlayContent.appendChild(autoLoadButton);
         overlayContent.appendChild(dynamicButton);
         overlayContent.appendChild(softMemoryButton);
+        overlayContent.appendChild(searchButton);
         overlayContent.appendChild(converterButton);
         overlayContent.appendChild(loginButton);
         overlayContent.appendChild(registerButton);
@@ -5279,6 +5411,7 @@ if (window.location.href.includes('sakura.fm')) {
 
     checkCharacterDiv();
 }
+
 }
 window.addEventListener('load', () => {
     loginStatusCheck();
