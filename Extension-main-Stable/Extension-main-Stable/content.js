@@ -2871,7 +2871,7 @@ const loginStatusCheck = async () => {
                 menu.style.transform = 'scale(0.98)';
                 menu.style.opacity = '0';
                 menu.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-
+                
                 setTimeout(() => {
                     menu.style.transform = 'scale(1)';
                     menu.style.opacity = '1';
@@ -3067,22 +3067,6 @@ const loginStatusCheck = async () => {
                                 }
                             },
                             {
-                                label: 'Rewind',
-                                icon: 'fas fa-backward',
-                                action: () => {
-                                    const messages = Array.from(chatMessages.children);
-                                    const currentIndex = messages.indexOf(messageDiv);
-                                    for (let i = messages.length - 1; i > currentIndex; i--) {
-                                        const msg = messages[i];
-                                        msg.className = 'animate__animated animate__fadeOut';
-                                        setTimeout(() => chatMessages.removeChild(msg), 500);
-                                        const savedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
-                                        const updatedMessages = savedMessages.filter(m => m.text !== msg.textContent);
-                                        localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));
-                                    }
-                                }
-                            },
-                            {
                                 label: 'Speak',
                                 icon: 'fas fa-volume-up', 
                                 action: () => {
@@ -3102,6 +3086,12 @@ const loginStatusCheck = async () => {
                                     const currentMode = localStorage.getItem('chatMode') || 'none';
                                     const newMode = currentMode === 'none' ? 'character_creation' : 'none';
                                     localStorage.setItem('chatMode', newMode);
+                                    const messages = Array.from(chatMessages.children);
+                                    messages.forEach(msg => {
+                                        msg.className = 'animate__animated animate__fadeOut';
+                                        setTimeout(() => chatMessages.removeChild(msg), 500);
+                                    });
+                                    localStorage.setItem('chatMessages', '[]');
                                 }
                             }
                         );
@@ -3124,7 +3114,6 @@ const loginStatusCheck = async () => {
 
                 chatMessages.appendChild(messageDiv);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
-                saveMessage(text, isUser);
             };
 
             let isGenerating = false;
@@ -3133,6 +3122,14 @@ const loginStatusCheck = async () => {
                 if (!input.value.trim()) return;
                 if (isGenerating) {
                     alert('Please wait while the bot is generating a response...');
+                    return;
+                }
+
+                const today = new Date().toLocaleDateString();
+                const messageCount = parseInt(localStorage.getItem(`messageCount_${today}`) || '0');
+
+                if (messageCount >= 150) {
+                    alert('You have exceeded your daily message limit of 150 messages. Please try again tomorrow.');
                     return;
                 }
 
@@ -3163,6 +3160,7 @@ const loginStatusCheck = async () => {
                     if (data.response && data.response.result && data.response.result.response) {
                         chatMessages.removeChild(typingIndicator);
                         addMessage(data.response.result.response);
+                        localStorage.setItem(`messageCount_${today}`, messageCount + 1);
                     } else {
                         chatMessages.removeChild(typingIndicator);
                         addMessage('Error: Invalid response format from server');
@@ -3191,42 +3189,7 @@ const loginStatusCheck = async () => {
                     document.body.removeChild(chatUI);
                 }, 500);
             };
-            const loadSavedMessages = () => {
-                const savedMessages = localStorage.getItem('chatMessages');
-                const userMessages = localStorage.getItem('userMessages');
-                if (savedMessages) {
-                    JSON.parse(savedMessages).forEach(msg => {
-                        addMessage(msg.text, msg.isUser);
-                    });
-                }
-                if (userMessages) {
-                    JSON.parse(userMessages).forEach(msg => {
-                        addMessage(msg.text, true);
-                    });
-                }
-            };
 
-            const saveMessage = (text, isUser) => {
-                const savedMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
-                savedMessages.push({ text, isUser });
-                localStorage.setItem('chatMessages', JSON.stringify(savedMessages));
-                
-                if (isUser) {
-                    const userMessages = JSON.parse(localStorage.getItem('userMessages') || '[]');
-                    userMessages.push({ text });
-                    localStorage.setItem('userMessages', JSON.stringify(userMessages));
-                }
-            };
-
-            loadSavedMessages();
-
-            document.addEventListener('click', (e) => {
-                if (!chatUI.contains(e.target) && !softMemoryButton.contains(e.target)) {
-                    chatMessages.innerHTML = '';
-                    loadSavedMessages();
-                }
-            });
-            
             inputContainer.appendChild(input);
             inputContainer.appendChild(sendButton);
             chatUI.appendChild(chatHeader);
