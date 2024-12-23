@@ -9,7 +9,7 @@ injectAnimateCSS();
 
 const checkLoginStatus = async () => {
     try {
-        const response = await fetch('https://whitz-tokenizer.onrender.com/check-login-status');
+        const response = await fetch('https://tiktoken-rwyz.onrender.com/check-login-status');
         const responseData = await response.json();
         const data = responseData;
         
@@ -234,7 +234,7 @@ const checkLoginStatus = async () => {
     }
 };
 const loginStatusCheck = async () => {
-    const responseDatav1 = await fetch('https://whitz-tokenizer.onrender.com/check-login-status');
+    const responseDatav1 = await fetch('https://tiktoken-rwyz.onrender.com/check-login-status');
     const isLoggedIn = await responseDatav1.json();
     console.log(isLoggedIn)
     if (isLoggedIn && isLoggedIn.is_login === true) {
@@ -1284,7 +1284,7 @@ const loginStatusCheck = async () => {
         
         tokenizeButton.onclick = async () => {
             try {
-                const loginCheckResponse = await fetch('https://whitz-tokenizer.onrender.com/check-login-status', {
+                const loginCheckResponse = await fetch('https://tiktoken-rwyz.onrender.com/check-login-status', {
                     method: 'GET',
                     headers: {
                         'Authorization': 'Bearer SSS155'
@@ -1989,7 +1989,7 @@ const loginStatusCheck = async () => {
             };
             yesButton.onclick = async () => {
                 try {
-                    const statusResponse = await fetch('https://whitz-tokenizer.onrender.com/check-login-status');
+                    const statusResponse = await fetch('https://tiktoken-rwyz.onrender.com/check-login-status');
                     const data = await statusResponse.json();
         
                     if (data.is_login === false) {
@@ -1998,7 +1998,7 @@ const loginStatusCheck = async () => {
                         return;
                     }
         
-                    const response = await fetch('https://whitz-tokenizer.onrender.com/logout', {
+                    const response = await fetch('https://tiktoken-rwyz.onrender.com/logout', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -3008,7 +3008,7 @@ const loginStatusCheck = async () => {
                                         chatMessages.removeChild(messageDiv);
                                         const typingIndicator = createTypingIndicator();
                                         chatMessages.appendChild(typingIndicator);
-                                        const response = await fetch('https://whitz-tokenizer.onrender.com/api/chat', {
+                                        const response = await fetch('https://own-seree-icgr.onrender.com/api/chat', {
                                             method: 'POST',
                                             headers: {
                                                 'Content-Type': 'application/json'
@@ -3099,7 +3099,7 @@ const loginStatusCheck = async () => {
                 chatMessages.appendChild(typingIndicator);
 
                 try {
-                    const response = await fetch('https://whitz-tokenizer.onrender.com/api/generate', {
+                    const response = await fetch('https://own-seree-icgr.onrender.com/api/generate', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -3113,18 +3113,22 @@ const loginStatusCheck = async () => {
                         })
                     });
 
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const data = await response.json();
                     if (data.response && data.response.result && data.response.result.response) {
                         chatMessages.removeChild(typingIndicator);
                         addMessage(data.response.result.response);
                         localStorage.setItem(`messageCount_${today}`, messageCount + 1);
                     } else {
-                        chatMessages.removeChild(typingIndicator);
-                        addMessage('Error: Invalid response format from server');
+                        throw new Error('Invalid response format from server');
                     }
                 } catch (error) {
+                    console.error('Error:', error);
                     chatMessages.removeChild(typingIndicator);
-                    addMessage('Error: Could not connect to the server');
+                    addMessage(`Error: ${error.message}`);
                 } finally {
                     isGenerating = false;
                 }
@@ -3253,7 +3257,7 @@ const loginStatusCheck = async () => {
             sendButton.onclick = async () => {
                 if (input.value.trim()) {
                     try {
-                        const response = await fetch('https://whitz-tokenizer.onrender.com/api/send/bugrepot', {
+                        const response = await fetch('https://tiktoken-rwyz.onrender.com/api/send/bugrepot', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -3382,7 +3386,7 @@ const loginStatusCheck = async () => {
             sendButton.onclick = async () => {
                 if (input.value.trim()) {
                     try {
-                        const response = await fetch('https://whitz-tokenizer.onrender.com/api/send/feedback', {
+                        const response = await fetch('https://tiktoken-rwyz.onrender.com/api/send/feedback', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -4248,7 +4252,7 @@ const loginStatusCheck = async () => {
         
         promptLibraryButton.onclick = async () => {
             try {
-                const viewUrl = 'https://whitz-tokenizer.onrender.com/prompts';
+                const viewUrl = 'https://tiktoken-rwyz.onrender.com/prompts';
                 const response = await fetch(viewUrl, {
                     method: 'GET',
                     headers: {
@@ -4371,7 +4375,7 @@ const loginStatusCheck = async () => {
             }
         
             try {
-                const response = await fetch('https://whitz-tokenizer.onrender.com/prompt_library', {
+                const response = await fetch('https://tiktoken-rwyz.onrender.com/prompt_library', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -4582,7 +4586,7 @@ const loginStatusCheck = async () => {
                 return JSON.stringify({ error: "Empty or invalid input" }, null, 2);
             }
         
-            const API_URL = 'https://whitz-tokenizer.onrender.com/tokenize';
+            const API_URL = 'https://tiktoken-rwyz.onrender.com/tokenize';
             const AUTH_HEADER = 'Bearer SSS155';
             const response = await fetch(API_URL, {
                 method: 'POST',
@@ -4814,7 +4818,7 @@ const loginStatusCheck = async () => {
             }
         
             try {
-                const response = await fetch('https://grammar-checker-j30b.onrender.com/grammar', {
+                const response = await fetch('https://grammar-checker-sh9h.onrender.com/grammar', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
