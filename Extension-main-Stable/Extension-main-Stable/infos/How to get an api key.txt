@@ -1,9 +1,0 @@
-**Step-by-Step Guide to Generating Your API Key:**  
-[Visit API Key Creation](https://aistudio.google.com/app/apikey)
-
-1. **Close Pop-ups:** Click the "X" on any pop-up windows.
-2. **Follow Prompts:** Complete all required checkboxes and follow the instructions.
-3. **Create Your Key:** Click **Create API Key** and hit **Got it** on the next screen.
-4. **Start a New Project:** Select **Create API Key** under a new project setup.
-5. **Copy Your Key:** Once generated, copy your API key.
-6. **Paste & Integrate:** Paste the key into the **"Gemini API Key"** field.
