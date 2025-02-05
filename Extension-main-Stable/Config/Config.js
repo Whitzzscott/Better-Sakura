@@ -1,1 +1,0 @@
-export const BASEURL = 'https://tiktoken-production.up.railway.app'
