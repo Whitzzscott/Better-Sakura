@@ -1,0 +1,76 @@
+{
+  "manifest_version": 3,
+  "name": "Better Sakura - Stable",
+  "version": "6.11.1",
+  "description": "A Chrome extension that makes Sakura much better",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs",
+    "webNavigation",
+    "downloads",
+    "management"
+    
+  ],
+  "host_permissions": [
+    "https://www.sakura.fm/*",
+    "https://github.com/Whitzzscott/Better-Sakura/*",
+    "*://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "logos/icon.png",
+      "48": "logos/icon.png",
+      "128": "logos/icon.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.sakura.fm/*",
+        "https://character.ai/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end",
+      "type": "module"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "creating.html",
+        "popup.html",
+        "tokenizer.html",
+        "login.html",
+        "register.html",
+        "libs/bootstrap.js",
+        "libs/jquery.js",
+        "Libs/animate.css",
+        "logos/BetterSakura.png",
+        "Scripts/AnimateInject.js",
+        "Scripts/Stats.js",
+        "Config/Config.js",
+        "Scripts/CharacterAi.js",
+        "Scripts/CustomAlert.js",
+        "assets/Kofi.png",
+        "assets/Ganknow.png",
+        "Scripts/inject.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "logos/icon.png",
+    "48": "logos/icon.png",
+    "128": "logos/icon.png"
+  }
+}
