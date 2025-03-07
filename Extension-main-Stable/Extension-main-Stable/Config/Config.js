@@ -1,0 +1,1 @@
+export const BASEURL = 'https://bettersakuraserver-production.up.railway.app';

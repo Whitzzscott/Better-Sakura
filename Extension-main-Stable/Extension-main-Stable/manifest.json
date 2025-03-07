@@ -1,0 +1,85 @@
+{
+  "manifest_version": 3,
+  "name": "Better Sakura - Stable",
+  "version": "9.17.4",
+  "description": "Multiple persona, speech to text, tokenizer, and so many more! all in one extension! Better Sakura~",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs",
+    "webNavigation",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "downloads",
+    "management",
+    "identity"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  },
+  "host_permissions": [
+    "https://www.sakura.fm/*",
+    "https://github.com/Whitzzscott/Better-Sakura/*",
+    "https://api.sakura.fm/*",
+    "*://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "logos/icon.png",
+      "48": "logos/icon.png",
+      "128": "logos/icon.png"
+    },
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.sakura.fm/*",
+        "https://character.ai/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end",
+      "type": "module"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "https://cdn.jsdelivr.net/gh/Whitzzscott/FlexDapt/Libs/",
+        "creating.html",
+        "popup.html",
+        "tokenizer.html",
+        "login.html",
+        "register.html",
+        "libs/bootstrap.js",
+        "libs/jquery.js",
+        "Libs/animate.css",
+        "logos/BetterSakura.png",
+        "Scripts/AnimateInject.js",
+        "Scripts/Stats.js",
+        "Config/Config.js",
+        "Scripts/CharacterAi.js",
+        "Scripts/CustomAlert.js",
+        "assets/Kofi.png",
+        "assets/Ganknow.png",
+        "Scripts/inject.js",
+        "index.html",
+        "logos/Mascot.png"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "logos/icon.png",
+    "48": "logos/icon.png",
+    "128": "logos/icon.png"
+  }
+}

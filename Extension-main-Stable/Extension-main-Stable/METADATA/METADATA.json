@@ -1,0 +1,31 @@
+{
+  "name": "Whitzscott",
+  "created_day": "11/25/2024",
+  "github_repo": "https://github.com/Whitzzscott/Better-Sakura",
+  "license": "MIT",
+  "description": "A Chrome extension that makes Sakura much better",
+  "repositoryType": "GitHub",
+  "Type": "Stable, Newer.",
+  "author": "Whitzscott",
+  "homepage": "https://whitzzscott.com",
+  "keywords": ["theme", "sakura", "customization"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Whitzzscott/Better-Sakura.git"
+  },
+  "disclaimer": "### Disclaimer: I do not own the rights to google-generative-ai.js nor with other libs.",
+  "libraries": [
+    "AOS",
+    "AOS CSS",
+    "Google AI JavaScript",
+    "Interact.js",
+    "Lottie.js",
+    "Tailwind CSS",
+    "Tailwind JS"
+  ],
+  "tags": [
+    "JavaScript",
+    "extension",
+    "apps,games."
+  ]
+}
