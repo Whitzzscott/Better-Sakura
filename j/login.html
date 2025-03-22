@@ -1,0 +1,60 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style type="text/css" id="operaUserStyle">
+        body {
+            font-family: 'Baloo Da 2', cursive;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/gh/Whitzzscott/FlexDapt/Libs/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/Whitzzscott/FlexDapt/Libs/popper.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Whitzzscott/FlexDapt/Libs/popper.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/Whitzzscott/FlexDapt/Libs/bootstrap.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Whitzzscott/FlexDapt/Libs/animate.css">
+    <link rel="stylesheet" href="./CSS/Login.css">
+    
+    <div class="container">
+        <div class="card animate__animated animate__fadeIn">
+            <h2 class="animate__animated animate__slideInDown">Login</h2>
+            <form id="loginForm">
+                <div class="form-group animate__animated animate__fadeInLeft animate__delay-1s">
+                    <label for="loginName">Username</label>
+                    <input type="text" class="form-control" id="loginName" required maxlength="100"
+                        pattern="[a-zA-Z0-9@#%^&*!\[\]]+" 
+                        title="Only letters, numbers, @, #, %, ^, &, *, !, [, and ] allowed, max 100 characters">
+                </div>
+                <div class="form-group animate__animated animate__fadeInRight animate__delay-1s">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" class="form-control" id="loginPassword" required maxlength="100"
+                        pattern="^[a-zA-Z0-9@#%^&*!\[\]]+$" 
+                        title="Only letters, numbers, @, #, %, ^, &, *, !, [, and ] allowed"
+                        onkeypress="return /^[a-zA-Z0-9@#%^&*!\[\]]+$/.test(event.key)">
+                </div>
+                <button type="submit" class="btn btn-custom animate__animated animate__bounceIn animate__delay-2s" id="loginButton">Log in</button>
+            </form>
+    
+            <form id="tokenLoginForm">
+                <div class="form-group animate__animated animate__fadeInLeft animate__delay-1s">
+                    <label for="TokenLogin">Login Using Token</label>
+                    <input type="text" class="form-control" id="TokenLogin" required maxlength="100"
+                        pattern="[a-zA-Z0-9@#%^&*!\[\]]+" 
+                        title="Only letters, numbers, @, #, %, ^, &, *, !, [, and ] allowed, max 100 characters">
+                </div>
+                <button type="submit" class="btn btn-custom animate__animated animate__bounceIn animate__delay-2s" id="TokenLoginButton">Log in</button>
+            </form>
+    
+            <div class="register-link animate__animated animate__fadeInUp animate__delay-2s">
+                <p>Don't have an account? <a href="register.html" class="register-btn">Sign up here</a></p>
+            </div>
+        </div>
+    </div>    
+
+<script src="login.js"></script>
+</body>
+</html>
